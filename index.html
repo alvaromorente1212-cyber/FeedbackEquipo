@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback del equipo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#fff; --ink:#1f2328; --muted:#6b7078; --line:#e4e1d8;
+    --accent:#2f6f5e; --accent-soft:#e3efe9; --warm:#b5651d; --warm-soft:#f8ecdf;
+    --danger:#a33a3a; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  header h1{font-size:20px;margin:0}
+  header .who{font-size:14px;color:var(--muted)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+  h2{font-size:18px;margin:0 0 10px}
+  h3{font-size:15px;margin:0 0 6px}
+  p{margin:0 0 10px}
+  .muted{color:var(--muted);font-size:14px}
+  label{display:block;font-weight:600;font-size:14px;margin:14px 0 4px}
+  .hint{font-size:13px;color:var(--muted);margin-bottom:6px}
+  input,select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  textarea{min-height:90px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+  .count{font-size:12px;color:var(--muted);text-align:right}
+  .count.bad{color:var(--danger)}
+  button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 16px;background:var(--accent);color:#fff;font-weight:600}
+  button.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button.link{background:none;color:var(--accent);padding:4px 6px;font-weight:600}
+  button.small{padding:6px 10px;font-size:13px}
+  button:disabled{opacity:.5;cursor:default}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+  .tabs button{background:transparent;color:var(--muted);border:1px solid transparent}
+  .tabs button.on{background:var(--card);color:var(--ink);border-color:var(--line)}
+  .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+  .person{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;text-align:left;color:var(--ink);font-weight:500}
+  .person.done{background:var(--accent-soft);cursor:default}
+  .person .tick{color:var(--accent);font-weight:700}
+  .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:14px}
+  .note.warm{background:var(--warm-soft)}
+  .err{color:var(--danger);font-size:14px;margin-top:8px;min-height:1em}
+  .fb{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:#fff}
+  .fb .tag{display:inline-block;font-size:12px;font-weight:700;border-radius:99px;padding:2px 10px;margin-bottom:6px}
+  .tag.keep{background:var(--accent-soft);color:var(--accent)}
+  .tag.try{background:var(--warm-soft);color:var(--warm)}
+  .tag.kudos{background:#ece8f6;color:#5b4a99}
+  .fb blockquote{margin:0 0 10px;padding:0;white-space:pre-wrap}
+  .fb.hidden{opacity:.55}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+  td.num{text-align:center}
+  .low{color:var(--danger);font-weight:700}
+  .ok{color:var(--accent);font-weight:700}
+  .center{text-align:center}
+  .tablewrap{overflow-x:auto}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal .card{max-width:520px;width:100%;max-height:90vh;overflow:auto}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+const SB_URL = 'https://xefnuudfxyisaogadnmp.supabase.co';
+const SB_KEY = 'sb_publishable_aZZqdtt-x6gjEmF1kxW0ng_lDATB4I7';
+const LIM = { sigue:[10,600], probar:[10,300], kudos:[0,300] };
+
+const ERRORES = {
+  SESION_INVALIDA:'Tu sesión ha caducado. Vuelve a entrar.',
+  LOGIN_INCORRECTO:'Nombre o contraseña incorrectos.',
+  PASS_CORTA:'La contraseña debe tener al menos 4 caracteres.',
+  INVITACION_USADA:'Este enlace ya se usó. Entra con tu nombre y contraseña.',
+  RONDA_CERRADA:'La ronda de feedback ya está cerrada.',
+  YA_ENVIADO:'Ya le has dejado feedback a esta persona.',
+  A_TI_MISMO:'No puedes dejarte feedback a ti mismo.',
+  NO_ADMIN:'No tienes permisos de administración.'
+};
+
+// ---------- utilidades ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(){ try{ return localStorage.getItem('fb_token'); }catch{ return null; } },
+  set(t){ try{ t ? localStorage.setItem('fb_token', t) : localStorage.removeItem('fb_token'); }catch{} }
+};
+let TOKEN = store.get();
+let YO = null;
+let TAB = 'dar';
+
+async function rpc(fn, args = {}){
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method:'POST',
+    headers:{ apikey:SB_KEY, 'Content-Type':'application/json' },
+    body:JSON.stringify(args)
+  });
+  const txt = await r.text();
+  const data = txt ? JSON.parse(txt) : null;
+  if(!r.ok){
+    const code = (data && data.message) || 'ERROR';
+    if(code === 'SESION_INVALIDA'){ store.set(null); TOKEN = null; }
+    throw new Error(ERRORES[code] || 'Ha ocurrido un error. Inténtalo de nuevo.');
+  }
+  return data;
+}
+
+function counter(el, [min,max]){
+  const c = el.parentElement.querySelector('.count');
+  const n = el.value.trim().length;
+  c.textContent = `${n}/${max}`;
+  c.classList.toggle('bad', n > max || (min && n > 0 && n < min));
+}
+
+// ---------- arranque ----------
+async function init(){
+  const code = new URLSearchParams(location.search).get('i');
+  if(code && !TOKEN) return pantallaInvitacion(code);
+  if(!TOKEN) return pantallaLogin();
+  try{
+    YO = await rpc('fb_yo', { p_token:TOKEN });
+    if(code) history.replaceState(null, '', location.pathname);
+    pantallaPrincipal();
+  }catch(e){ pantallaLogin(e.message); }
+}
+
+// ---------- invitación (primera vez) ----------
+async function pantallaInvitacion(code){
+  const app = $('#app');
+  let info = null;
+  try{ info = await rpc('fb_info_invitacion', { p_code:code }); }catch{}
+  if(!info){
+    history.replaceState(null, '', location.pathname);
+    return pantallaLogin('Este enlace no es válido. Pide uno nuevo a tu responsable.');
+  }
+  if(info.reclamada){
+    history.replaceState(null, '', location.pathname);
+    return pantallaLogin('Ya creaste tu contraseña con este enlace. Entra con tu nombre.');
+  }
+  app.innerHTML = `
+    <header><h1>💬 Feedback del equipo</h1></header>
+    <div class="card">
+      <h2>Hola, ${esc(info.nombre)} 👋</h2>
+      <p>Elige una contraseña para entrar. A partir de ahora entrarás eligiendo tu nombre y esta contraseña.</p>
+      <label for="p1">Contraseña</label>
+      <input id="p1" type="password" autocomplete="new-password">
+      <label for="p2">Repítela</label>
+      <input id="p2" type="password" autocomplete="new-password">
+      <div class="err" id="err"></div>
+      <button id="go">Crear y entrar</button>
+    </div>`;
+  $('#go').onclick = async () => {
+    const p1 = $('#p1').value, p2 = $('#p2').value;
+    if(p1 !== p2) return $('#err').textContent = 'Las contraseñas no coinciden.';
+    try{
+      TOKEN = await rpc('fb_reclamar', { p_code:code, p_pass:p1 });
+      store.set(TOKEN);
+      history.replaceState(null, '', location.pathname);
+      init();
+    }catch(e){ $('#err').textContent = e.message; }
+  };
+}
+
+// ---------- login ----------
+async function pantallaLogin(msg = ''){
+  const app = $('#app');
+  let nombres = [];
+  try{ nombres = await rpc('fb_lista_nombres'); }catch{}
+  app.innerHTML = `
+    <header><h1>💬 Feedback del equipo</h1></header>
+    <div class="card">
+      <h2>Entrar</h2>
+      <label for="nom">Tu nombre</label>
+      <select id="nom"><option value="">Elige tu nombre…</option>
+        ${nombres.map(n => `<option value="${n.id}">${esc(n.nombre)}</option>`).join('')}
+      </select>
+      <label for="pw">Contraseña</label>
+      <input id="pw" type="password" autocomplete="current-password">
+      <div class="err" id="err">${esc(msg)}</div>
+      <button id="go">Entrar</button>
+      <p class="muted" style="margin-top:14px">¿No apareces en la lista? Usa primero el enlace personal que te ha enviado tu responsable.</p>
+    </div>`;
+  const go = async () => {
+    const id = $('#nom').value, pw = $('#pw').value;
+    if(!id || !pw) return $('#err').textContent = 'Elige tu nombre y escribe tu contraseña.';
+    $('#go').disabled = true;
+    try{
+      TOKEN = await rpc('fb_login', { p_persona:id, p_pass:pw });
+      store.set(TOKEN);
+      init();
+    }catch(e){ $('#err').textContent = e.message; $('#go').disabled = false; }
+  };
+  $('#go').onclick = go;
+  $('#pw').onkeydown = e => { if(e.key === 'Enter') go(); };
+}
+
+async function salir(){
+  try{ await rpc('fb_logout', { p_token:TOKEN }); }catch{}
+  store.set(null); TOKEN = null; YO = null;
+  pantallaLogin();
+}
+
+// ---------- principal ----------
+function pantallaPrincipal(){
+  const app = $('#app');
+  app.innerHTML = `
+    <header>
+      <div><h1>💬 ${esc(YO.ronda)}</h1><div class="who">${esc(YO.nombre)}</div></div>
+      <button class="sec small" id="salir">Salir</button>
+    </header>
+    <nav class="tabs">
+      <button data-t="dar">Dar feedback</button>
+      <button data-t="mio">Mi feedback</button>
+      ${YO.es_admin ? '<button data-t="admin">Administración</button>' : ''}
+      <button data-t="como">Cómo funciona</button>
+    </nav>
+    <div id="view"></div>`;
+  $('#salir').onclick = salir;
+  app.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { TAB = b.dataset.t; pintarTab(); });
+  pintarTab();
+}
+
+function pintarTab(){
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === TAB));
+  ({ dar:vistaDar, mio:vistaMio, admin:vistaAdmin, como:vistaComo }[TAB] || vistaDar)();
+}
+
+const estadoTexto = e => ({
+  abierta:'La ronda está abierta: puedes dejar feedback.',
+  cerrada:'La ronda está cerrada. Los feedbacks se publicarán en breve.',
+  publicada:'Los feedbacks ya están publicados. Mira la pestaña «Mi feedback».'
+}[e]);
+
+// ---------- dar feedback ----------
+async function vistaDar(){
+  const v = $('#view');
+  v.innerHTML = '<p class="muted">Cargando…</p>';
+  let gente = [];
+  try{ gente = await rpc('fb_companeros', { p_token:TOKEN }); }
+  catch(e){ return manejarError(e); }
+  const hechos = gente.filter(g => g.enviado).length;
+  v.innerHTML = `
+    <div class="note">${estadoTexto(YO.estado)}</div>
+    <div class="card">
+      <h2>¿A quién quieres dejar feedback?</h2>
+      <p class="muted">Elige solo a personas con las que hayas trabajado. Es anónimo: nadie, tampoco tu responsable, sabrá qué has escrito tú. Llevas <b>${hechos}</b>.</p>
+      <div class="people">
+        ${gente.map(g => `
+          <button class="person ${g.enviado ? 'done' : ''}" data-id="${g.id}" data-n="${esc(g.nombre)}" ${g.enviado || YO.estado !== 'abierta' ? 'disabled' : ''}>
+            <span>${esc(g.nombre)}</span>${g.enviado ? '<span class="tick">✓ enviado</span>' : ''}
+          </button>`).join('')}
+      </div>
+    </div>`;
+  v.querySelectorAll('.person:not(.done)').forEach(b => b.onclick = () => formulario(b.dataset.id, b.dataset.n));
+}
+
+function formulario(id, nombre){
+  const v = $('#view');
+  v.innerHTML = `
+    <div class="card">
+      <button class="link" id="volver">← Volver</button>
+      <h2>Feedback para ${esc(nombre)}</h2>
+      <p class="muted">Piensa en momentos concretos que hayas vivido con ${esc(nombre)}: qué hizo y qué efecto tuvo. Habla de lo que hace, no de cómo es.</p>
+
+      <label>✅ Sigue haciendo… (1)</label>
+      <div class="hint">Algo que hace bien y que te gustaría que siguiera haciendo.</div>
+      <textarea id="s1" maxlength="${LIM.sigue[1]}" placeholder="Ej.: Cuando el cliente cambió el alcance en la reunión, reorganizaste las tareas al momento y nadie se perdió."></textarea>
+      <div class="count"></div>
+
+      <label>✅ Sigue haciendo… (2)</label>
+      <div class="hint">Otra cosa distinta que valoras de trabajar con ${esc(nombre)}.</div>
+      <textarea id="s2" maxlength="${LIM.sigue[1]}" placeholder="Ej.: Siempre sacas un rato para explicar las cosas cuando alguien se atasca."></textarea>
+      <div class="count"></div>
+
+      <label>🌱 Te propondría probar…</label>
+      <div class="hint">Una sola sugerencia que le ayudaría a crecer. Escríbela como propuesta, no como queja.</div>
+      <textarea id="pr" maxlength="${LIM.probar[1]}" placeholder="Ej.: Compartir los avances antes de la entrega; así te podríamos echar una mano antes."></textarea>
+      <div class="count"></div>
+
+      <label>🙌 Gracias por… <span class="muted">(opcional)</span></label>
+      <textarea id="ku" maxlength="${LIM.kudos[1]}" style="min-height:60px" placeholder="Ej.: Gracias por cubrirme el día que estuve malo."></textarea>
+      <div class="count"></div>
+
+      <div class="err" id="err"></div>
+      <div class="row"><button id="rev">Revisar y enviar</button></div>
+    </div>`;
+  $('#volver').onclick = vistaDar;
+  const campos = [['#s1',LIM.sigue],['#s2',LIM.sigue],['#pr',LIM.probar],['#ku',LIM.kudos]];
+  campos.forEach(([s,l]) => { const el = $(s); el.oninput = () => counter(el,l); counter(el,l); });
+
+  $('#rev').onclick = () => {
+    const val = { s1:$('#s1').value.trim(), s2:$('#s2').value.trim(), pr:$('#pr').value.trim(), ku:$('#ku').value.trim() };
+    if(val.s1.length < 10 || val.s2.length < 10) return $('#err').textContent = 'Escribe las dos cosas a seguir haciendo (mínimo 10 caracteres cada una).';
+    if(val.pr.length < 10) return $('#err').textContent = 'Escribe una sugerencia (mínimo 10 caracteres).';
+    $('#err').textContent = '';
+    confirmar(id, nombre, val);
+  };
+}
+
+function confirmar(id, nombre, val){
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `
+    <div class="card">
+      <h2>¿Lo enviamos?</h2>
+      <p class="muted">Así lo leerá ${esc(nombre)}. Una vez enviado <b>no se puede editar</b>, porque no guardamos quién lo escribió.</p>
+      <div class="fb">
+        <span class="tag keep">Sigue haciendo</span><blockquote>${esc(val.s1)}</blockquote>
+        <span class="tag keep">Sigue haciendo</span><blockquote>${esc(val.s2)}</blockquote>
+        <span class="tag try">Te propondría probar</span><blockquote>${esc(val.pr)}</blockquote>
+        ${val.ku ? `<span class="tag kudos">Gracias por…</span><blockquote>${esc(val.ku)}</blockquote>` : ''}
+      </div>
+      <div class="err" id="err2"></div>
+      <div class="row"><button id="ok">Enviar</button><button class="sec" id="no">Seguir editando</button></div>
+    </div>`;
+  document.body.appendChild(m);
+  m.querySelector('#no').onclick = () => m.remove();
+  m.querySelector('#ok').onclick = async () => {
+    m.querySelector('#ok').disabled = true;
+    try{
+      await rpc('fb_enviar', { p_token:TOKEN, p_dest:id, p_sigue_1:val.s1, p_sigue_2:val.s2, p_probar:val.pr, p_kudos:val.ku || null });
+      m.remove();
+      vistaDar();
+    }catch(e){ m.querySelector('#err2').textContent = e.message; m.querySelector('#ok').disabled = false; }
+  };
+}
+
+// ---------- mi feedback ----------
+async function vistaMio(){
+  const v = $('#view');
+  v.innerHTML = '<p class="muted">Cargando…</p>';
+  let r;
+  try{ r = await rpc('fb_mis_feedbacks', { p_token:TOKEN }); }
+  catch(e){ return manejarError(e); }
+
+  if(r.estado === 'abierta' || r.estado === 'cerrada'){
+    v.innerHTML = `<div class="card center">
+      <h2>Aún no está publicado</h2>
+      <p class="muted">Todos los feedbacks se publican a la vez cuando termine la ronda, para que nadie pueda deducir quién escribió qué. Te avisaremos.</p></div>`;
+    return;
+  }
+  if(r.estado === 'insuficiente'){
+    v.innerHTML = `<div class="card center">
+      <h2>No hay suficientes respuestas</h2>
+      <p class="muted">Para proteger el anonimato solo mostramos el feedback cuando hay al menos ${r.min} personas que lo han dejado, y en tu caso no se ha llegado. No dice nada de ti: simplemente no ha participado suficiente gente.</p></div>`;
+    return;
+  }
+  const cs = r.comentarios;
+  const visibles = cs.filter(c => !c.oculto), ocultos = cs.filter(c => c.oculto);
+  v.innerHTML = `
+    <div class="note">Has recibido feedback de <b>${cs.length}</b> compañeros. El orden es aleatorio y no hay forma de saber quién escribió cada uno. Léelo con calma: lo de «probar» son propuestas para crecer, no fallos.</div>
+    <div id="lista"></div>
+    ${ocultos.length ? `<button class="link" id="verOcultos">Mostrar ${ocultos.length} oculto(s)</button><div id="ocultos" class="hide"></div>` : ''}`;
+  const pinta = c => `
+    <div class="fb ${c.oculto ? 'hidden' : ''}" data-id="${c.id}">
+      <span class="tag keep">Sigue haciendo</span><blockquote>${esc(c.sigue_1)}</blockquote>
+      <span class="tag keep">Sigue haciendo</span><blockquote>${esc(c.sigue_2)}</blockquote>
+      <span class="tag try">Te propondría probar</span><blockquote>${esc(c.probar)}</blockquote>
+      ${c.kudos ? `<span class="tag kudos">Gracias por…</span><blockquote>${esc(c.kudos)}</blockquote>` : ''}
+      <div class="row">
+        <button class="small ${c.gracias ? '' : 'sec'}" data-a="gracias">${c.gracias ? '💚 Agradecido' : '💚 Dar las gracias'}</button>
+        <button class="small sec" data-a="ocultar">${c.oculto ? 'Volver a mostrar' : 'Ocultar'}</button>
+      </div>
+    </div>`;
+  $('#lista').innerHTML = visibles.map(pinta).join('');
+  if(ocultos.length){
+    $('#ocultos').innerHTML = ocultos.map(pinta).join('');
+    $('#verOcultos').onclick = () => { $('#ocultos').classList.toggle('hide'); };
+  }
+  v.querySelectorAll('.fb button').forEach(b => b.onclick = async () => {
+    const id = b.closest('.fb').dataset.id;
+    const c = cs.find(x => x.id === id);
+    const args = { p_token:TOKEN, p_id:id, p_oculto:null, p_gracias:null };
+    if(b.dataset.a === 'gracias') args.p_gracias = !c.gracias; else args.p_oculto = !c.oculto;
+    try{ await rpc('fb_marcar', args); vistaMio(); }catch(e){ manejarError(e); }
+  });
+}
+
+// ---------- administración ----------
+async function vistaAdmin(){
+  const v = $('#view');
+  v.innerHTML = '<p class="muted">Cargando…</p>';
+  let r;
+  try{ r = await rpc('fb_admin_resumen', { p_token:TOKEN }); }
+  catch(e){ return manejarError(e); }
+  const c = r.config, ps = r.personas;
+  const base = location.origin + location.pathname;
+  const activos = ps.filter(p => p.activo);
+  const bajoMin = activos.filter(p => p.recibidos < c.min_feedbacks).length;
+
+  v.innerHTML = `
+    <div class="note warm">Aquí solo ves cifras. El contenido de los feedbacks no es visible para nadie salvo para quien los recibe.</div>
+    <div class="card">
+      <h2>Ronda</h2>
+      <label for="rn">Nombre</label><input id="rn" value="${esc(c.ronda)}">
+      <label for="es">Estado</label>
+      <select id="es">
+        <option value="abierta" ${c.estado==='abierta'?'selected':''}>Abierta: se puede escribir</option>
+        <option value="cerrada" ${c.estado==='cerrada'?'selected':''}>Cerrada: no se escribe ni se publica</option>
+        <option value="publicada" ${c.estado==='publicada'?'selected':''}>Publicada: cada uno ve lo suyo</option>
+      </select>
+      <label for="mn">Mínimo de feedbacks para mostrarlos</label>
+      <input id="mn" type="number" min="1" max="10" value="${c.min_feedbacks}">
+      <div class="err" id="errc"></div>
+      <button id="gc">Guardar</button>
+    </div>
+
+    <div class="card">
+      <h2>Personas (${activos.length})</h2>
+      <p class="muted">${bajoMin} persona(s) por debajo del mínimo de ${c.min_feedbacks}. Copia el enlace de cada uno y envíaselo por privado; solo sirve para crear su contraseña.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Nombre</th><th class="center">Cuenta</th><th class="center">Ha dado</th><th class="center">Recibidos</th><th></th></tr></thead>
+        <tbody>
+        ${ps.map(p => `
+          <tr style="${p.activo ? '' : 'opacity:.45'}" data-id="${p.id}" data-code="${p.invite_code}">
+            <td>${esc(p.nombre)}${p.es_admin ? ' <span class="muted">(admin)</span>' : ''}</td>
+            <td class="num">${p.reclamada ? '<span class="ok">✓</span>' : '—'}</td>
+            <td class="num">${p.dados}</td>
+            <td class="num ${p.recibidos < c.min_feedbacks ? 'low' : 'ok'}">${p.recibidos}</td>
+            <td style="white-space:nowrap">
+              ${!p.reclamada && p.activo ? '<button class="small" data-a="copiar">Copiar enlace</button>' : ''}
+              ${p.reclamada ? '<button class="small sec" data-a="reset" title="Si ha olvidado la contraseña">Reiniciar</button>' : ''}
+              ${p.es_admin ? '' : `<button class="small sec" data-a="${p.activo ? 'desactivar' : 'activar'}">${p.activo ? 'Quitar' : 'Reactivar'}</button>`}
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <h2>Añadir personas</h2>
+      <p class="muted">Un nombre por línea, tal y como queráis que aparezca.</p>
+      <textarea id="nuevos" placeholder="Nombre Apellido&#10;Nombre Apellido"></textarea>
+      <div class="err" id="erra"></div>
+      <button id="add">Añadir</button>
+    </div>`;
+
+  $('#gc').onclick = async () => {
+    const estado = $('#es').value;
+    if(estado === 'publicada' && c.estado !== 'publicada' &&
+       !confirm('Al publicar, cada persona con al menos ' + $('#mn').value + ' feedbacks podrá verlos. ¿Publicar ahora?')) return;
+    try{
+      await rpc('fb_admin_config', { p_token:TOKEN, p_ronda:$('#rn').value, p_estado:estado, p_min:+$('#mn').value });
+      YO = await rpc('fb_yo', { p_token:TOKEN });
+      pantallaPrincipal();
+    }catch(e){ $('#errc').textContent = e.message; }
+  };
+  $('#add').onclick = async () => {
+    try{
+      const n = await rpc('fb_admin_add', { p_token:TOKEN, p_nombres:$('#nuevos').value });
+      $('#erra').textContent = '';
+      if(!n) $('#erra').textContent = 'No se añadió nadie (¿nombres repetidos o vacíos?).';
+      else vistaAdmin();
+    }catch(e){ $('#erra').textContent = e.message; }
+  };
+  v.querySelectorAll('tbody button').forEach(b => b.onclick = async () => {
+    const tr = b.closest('tr'), a = b.dataset.a;
+    if(a === 'copiar'){
+      const link = `${base}?i=${tr.dataset.code}`;
+      try{ await navigator.clipboard.writeText(link); b.textContent = '¡Copiado!'; }
+      catch{ prompt('Copia este enlace:', link); }
+      return;
+    }
+    if(a === 'reset' && !confirm('Se borrará su contraseña y se generará un enlace nuevo. ¿Continuar?')) return;
+    try{ await rpc('fb_admin_persona', { p_token:TOKEN, p_id:tr.dataset.id, p_accion:a }); vistaAdmin(); }
+    catch(e){ alert(e.message); }
+  });
+}
+
+// ---------- cómo funciona ----------
+function vistaComo(){
+  $('#view').innerHTML = `
+    <div class="card">
+      <h2>Cómo funciona</h2>
+      <h3>Para qué sirve</h3>
+      <p>Para que cada uno sepa qué ven en él los compañeros con los que trabaja: lo que más valoran y algo que le ayudaría a crecer. Es para tu desarrollo; nadie más que tú lee tu feedback.</p>
+      <h3>Qué se escribe</h3>
+      <p>Por cada compañero: <b>dos cosas que hace bien y debería seguir haciendo</b> y <b>una propuesta para probar</b>. Además, un «gracias por…» opcional. Mejor si hablas de hechos concretos que de cómo es la persona.</p>
+      <h3>Anonimato</h3>
+      <p>No se guarda quién escribió cada comentario ni cuándo. Solo se apunta que ya le has escrito a esa persona, para que no se repita. Por eso no se puede editar después de enviarlo.</p>
+      <p>Todo se publica de golpe al cerrar la ronda y solo si una persona tiene al menos ${YO.min} feedbacks; si no, no se le enseña nada para que no se pueda adivinar el autor.</p>
+      <h3>Si algo no te gusta</h3>
+      <p>Puedes ocultar cualquier comentario que recibas. Y puedes dar las gracias de forma anónima a los que te hayan servido.</p>
+    </div>`;
+}
+
+function manejarError(e){
+  if(!TOKEN) return pantallaLogin(e.message);
+  $('#view').innerHTML = `<div class="card"><p class="err">${esc(e.message)}</p></div>`;
+}
+
+init();
+</script>
+</body>
+</html>
