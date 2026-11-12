@@ -2,90 +2,151 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7c5cff">
 <title>Feedback del equipo</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f6f4ef; --card:#fff; --ink:#1f2328; --muted:#6b7078; --line:#e4e1d8;
-    --accent:#2f6f5e; --accent-soft:#e3efe9; --warm:#b5651d; --warm-soft:#f8ecdf;
-    --danger:#a33a3a; --radius:14px;
+    --bg:#fbf7f2; --card:#ffffff; --ink:#2b2540; --muted:#857d98; --line:#efe8f6;
+    --pri:#7c5cff; --pri-2:#a78bfa; --pri-soft:#f0ebff;
+    --coral:#ff7a59; --coral-soft:#fff0ea; --mint:#16b88a; --mint-soft:#e3f8f1;
+    --gold:#ffb703; --danger:#e5484d;
+    --r:22px; --shadow:0 10px 30px -12px rgba(76,52,160,.18), 0 2px 6px rgba(76,52,160,.06);
   }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
-  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-  header h1{font-size:20px;margin:0}
-  header .who{font-size:14px;color:var(--muted)}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px}
-  h2{font-size:18px;margin:0 0 10px}
-  h3{font-size:15px;margin:0 0 6px}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{font-family:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;min-height:100vh;
+    background-image:radial-gradient(600px 300px at 100% -5%, #efe7ff 0, transparent 70%),radial-gradient(500px 280px at -10% 30%, #fff1e8 0, transparent 70%)}
+  .wrap{max-width:720px;margin:0 auto;padding:18px 16px 110px}
+  h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em}
+  h2{font-size:20px;margin-bottom:6px}
+  h3{font-size:16px}
   p{margin:0 0 10px}
-  .muted{color:var(--muted);font-size:14px}
-  label{display:block;font-weight:600;font-size:14px;margin:14px 0 4px}
-  .hint{font-size:13px;color:var(--muted);margin-bottom:6px}
-  input,select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
-  textarea{min-height:90px;resize:vertical}
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
-  .count{font-size:12px;color:var(--muted);text-align:right}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+
+  /* Cabecera */
+  .hero{background:linear-gradient(135deg,var(--pri) 0%,#9f7bff 55%,var(--coral) 140%);color:#fff;border-radius:28px;padding:22px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-bottom:16px}
+  .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}
+  .hero h1{font-size:24px}
+  .hero p{margin:4px 0 0;opacity:.92;font-weight:600}
+  .hero .out{position:absolute;right:14px;top:14px;z-index:1;background:rgba(255,255,255,.18);color:#fff;border:0;padding:7px 12px;border-radius:99px;font-weight:800;font-size:13px}
+
+  /* Pestañas */
+  .tabs{display:flex;gap:6px;background:#fff;border-radius:99px;padding:5px;box-shadow:var(--shadow);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:1;white-space:nowrap;background:none;border:0;color:var(--muted);font:inherit;font-weight:800;font-size:14px;padding:9px 12px;border-radius:99px;cursor:pointer;transition:.2s}
+  .tabs button.on{background:var(--pri);color:#fff;box-shadow:0 6px 14px -6px var(--pri)}
+
+  .card{background:var(--card);border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);animation:pop .35s ease both}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+
+  label{display:block;font-weight:800;font-size:14px;margin:14px 0 6px}
+  .hint{font-size:13px;color:var(--muted);margin:-2px 0 8px}
+  input,select,textarea{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:2px solid var(--line);border-radius:14px;background:#fdfcff;color:var(--ink);transition:.15s}
+  textarea{min-height:96px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:0;border-color:var(--pri-2);background:#fff;box-shadow:0 0 0 4px var(--pri-soft)}
+  .count{font-size:12px;color:var(--muted);text-align:right;margin-top:4px}
   .count.bad{color:var(--danger)}
-  button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 16px;background:var(--accent);color:#fff;font-weight:600}
-  button.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
-  button.link{background:none;color:var(--accent);padding:4px 6px;font-weight:600}
-  button.small{padding:6px 10px;font-size:13px}
-  button:disabled{opacity:.5;cursor:default}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-  .tabs button{background:transparent;color:var(--muted);border:1px solid transparent}
-  .tabs button.on{background:var(--card);color:var(--ink);border-color:var(--line)}
-  .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
-  .person{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;text-align:left;color:var(--ink);font-weight:500}
-  .person.done{background:var(--accent-soft);cursor:default}
-  .person .tick{color:var(--accent);font-weight:700}
-  .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:14px}
-  .note.warm{background:var(--warm-soft)}
-  .err{color:var(--danger);font-size:14px;margin-top:8px;min-height:1em}
-  .fb{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:#fff}
-  .fb .tag{display:inline-block;font-size:12px;font-weight:700;border-radius:99px;padding:2px 10px;margin-bottom:6px}
-  .tag.keep{background:var(--accent-soft);color:var(--accent)}
-  .tag.try{background:var(--warm-soft);color:var(--warm)}
-  .tag.kudos{background:#ece8f6;color:#5b4a99}
-  .fb blockquote{margin:0 0 10px;padding:0;white-space:pre-wrap}
-  .fb.hidden{opacity:.55}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
-  th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-  td.num{text-align:center}
-  .low{color:var(--danger);font-weight:700}
-  .ok{color:var(--accent);font-weight:700}
+
+  button{font:inherit;cursor:pointer}
+  .btn{border:0;border-radius:16px;padding:13px 20px;background:var(--pri);color:#fff;font-weight:900;font-size:16px;box-shadow:0 8px 18px -8px var(--pri);transition:transform .1s, opacity .2s}
+  .btn:active{transform:scale(.97)}
+  .btn:disabled{opacity:.5}
+  .btn.ghost{background:var(--pri-soft);color:var(--pri);box-shadow:none}
+  .btn.block{width:100%}
+  .link{background:none;border:0;color:var(--pri);font-weight:800;padding:4px 0}
+  .chipbtn{border:0;border-radius:99px;padding:7px 12px;font-weight:800;font-size:13px;background:var(--pri-soft);color:var(--pri)}
+  .chipbtn.on{background:var(--mint);color:#fff}
+  .chipbtn.grey{background:#f3f1f6;color:var(--muted)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .err{color:var(--danger);font-size:14px;font-weight:700;min-height:1.2em;margin:8px 0}
   .center{text-align:center}
-  .tablewrap{overflow-x:auto}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
-  .modal .card{max-width:520px;width:100%;max-height:90vh;overflow:auto}
   .hide{display:none!important}
-  .comp{margin-top:18px}
-  .comp h3{font-size:15px;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:4px}
-  .q{padding:10px 0;border-bottom:1px dashed var(--line)}
-  .q:last-child{border-bottom:0}
-  .q p{font-size:14px;margin:0 0 8px}
-  .scale{display:flex;gap:6px;flex-wrap:wrap}
-  .scale button{background:#fff;color:var(--ink);border:1px solid var(--line);padding:6px 0;width:40px;font-weight:600}
-  .scale button.ns{width:auto;padding:6px 10px;font-weight:500;color:var(--muted);font-size:13px}
-  .scale button.on{background:var(--accent);border-color:var(--accent);color:#fff}
-  .scale button.ns.on{background:#eceae4;color:var(--ink);border-color:#d6d3ca}
-  .legend{font-size:12px;color:var(--muted);margin-top:6px}
-  .bar{height:8px;background:#eceae4;border-radius:99px;overflow:hidden;flex:1;min-width:60px}
-  .bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
-  .stat{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px}
-  .stat .lbl{flex:2}
-  .stat .val{width:34px;text-align:right;font-weight:700}
-  details summary{cursor:pointer;list-style:none}
+  .big-emoji{font-size:46px;line-height:1;margin-bottom:8px}
+
+  /* Avatares y personas */
+  .avatar{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-weight:900;color:#fff;font-size:15px;flex-shrink:0}
+  .search{margin:6px 0 12px}
+  .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+  .person{display:flex;align-items:center;gap:12px;padding:10px 12px;border:2px solid var(--line);border-radius:18px;background:#fff;text-align:left;color:var(--ink);font-weight:800;transition:.15s}
+  .person:not(:disabled):hover{border-color:var(--pri-2);transform:translateY(-1px)}
+  .person .who{flex:1;line-height:1.2}
+  .person .who small{display:block;font-weight:700;color:var(--muted);font-size:12px;margin-top:2px}
+  .person.done{background:var(--mint-soft);border-color:transparent}
+  .person.done small{color:var(--mint)}
+  .progress{height:10px;background:var(--pri-soft);border-radius:99px;overflow:hidden;margin:8px 0 2px}
+  .progress span{display:block;height:100%;background:linear-gradient(90deg,var(--pri),var(--coral));border-radius:99px;transition:width .6s}
+
+  /* Formulario */
+  .comp{border-radius:var(--r);padding:16px 16px 6px;margin-bottom:12px;background:#fff;box-shadow:var(--shadow)}
+  .comp-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .comp-h .ico{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:19px}
+  .q{padding:12px 0;border-top:1px dashed var(--line)}
+  .q p{font-size:15px;font-weight:600;margin:0 0 8px}
+  .stars{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+  .star{background:none;border:0;padding:2px;font-size:30px;line-height:1;color:#e4def0;transition:transform .12s,color .12s}
+  .star.on{color:var(--gold)}
+  .star:active{transform:scale(1.25)}
+  .ns{margin-left:8px}
+  .qlabel{font-size:12px;font-weight:800;color:var(--muted);min-height:16px;margin-top:2px}
+  .bottombar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(251,247,242,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);z-index:5}
+  .bottombar .in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px}
+  .bottombar .txt{flex:1;font-weight:800;font-size:14px;color:var(--muted)}
+
+  /* Resultados */
+  .total{display:flex;align-items:center;gap:14px}
+  .total .num{font-size:40px;font-weight:900;color:var(--pri);line-height:1}
+  .stat{display:flex;align-items:center;gap:10px;padding:8px 0}
+  .stat .lbl{flex:1;font-weight:700;font-size:14px}
+  .stat .val{font-weight:900;min-width:38px;text-align:right}
+  .bar{height:10px;width:90px;background:#f1edf8;border-radius:99px;overflow:hidden}
+  .bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),#ffd166)}
+  details{border-top:1px dashed var(--line)}
+  details:first-of-type{border-top:0}
+  details summary{list-style:none;cursor:pointer}
   details summary::-webkit-details-marker{display:none}
-  .chips{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-  .chip{font-size:14px;padding:8px 12px;border-radius:10px}
-  .chip.c-top{background:var(--accent-soft)}
-  .chip.c-low{background:var(--warm-soft)}
-  .sticky{position:sticky;bottom:0;background:var(--bg);padding:12px 0 4px;margin-top:6px}
+  details summary .lbl::after{content:" ›";color:var(--muted);display:inline-block;transition:.2s}
+  details[open] summary .lbl::after{transform:rotate(90deg)}
+  .sub{padding:4px 0 8px 12px}
+  .sub .stat{padding:5px 0}
+  .sub .lbl{font-weight:600;font-size:13px;color:#5a5270}
+  .votes{font-size:11px;color:var(--muted);font-weight:700}
+  .pill{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:16px;font-weight:700;font-size:14px;margin-top:8px}
+  .pill.top{background:var(--mint-soft)}
+  .pill.low{background:var(--coral-soft)}
+  .notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:8px}
+  .note{border-radius:18px;padding:16px;font-size:15px;font-weight:600;position:relative}
+  .note.v{background:#fff6d6}
+  .note.p{background:#e8f4ff}
+  .note.hidden{opacity:.5}
+  .note blockquote{margin:0 0 12px;white-space:pre-wrap}
+  .note .row button{font-size:12px}
+
+  /* Admin */
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+  td.num{text-align:center;font-weight:800}
+  .tablewrap{overflow-x:auto}
+  .banner{border-radius:18px;padding:12px 14px;font-weight:700;font-size:14px;margin-bottom:14px;background:var(--pri-soft);color:#4b3aa8}
+  .banner.warm{background:var(--coral-soft);color:#a3401f}
+
+  /* Modal, toast, confeti */
+  .modal{position:fixed;inset:0;background:rgba(43,37,64,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20;animation:fade .2s}
+  .modal .card{max-width:520px;width:100%;border-radius:28px 28px 0 0;margin:0;padding:24px 20px calc(24px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;animation:up .3s ease}
+  @media(min-width:600px){.modal{align-items:center}.modal .card{border-radius:28px}}
+  @keyframes fade{from{opacity:0}}
+  @keyframes up{from{transform:translateY(40px);opacity:0}}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:16px;font-weight:800;z-index:30;box-shadow:var(--shadow);animation:up .3s ease;max-width:90vw;text-align:center}
+  .confetti{position:fixed;top:-12px;width:10px;height:14px;border-radius:3px;z-index:40;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.8}}
+  .skeleton{height:80px;border-radius:var(--r);background:linear-gradient(90deg,#f3eff9 25%,#faf8fd 50%,#f3eff9 75%);background-size:200% 100%;animation:sh 1.2s infinite}
+  @keyframes sh{to{background-position:-200% 0}}
 </style>
 </head>
 <body>
@@ -94,44 +155,44 @@
 <script>
 const SB_URL = 'https://xefnuudfxyisaogadnmp.supabase.co';
 const SB_KEY = 'sb_publishable_aZZqdtt-x6gjEmF1kxW0ng_lDATB4I7';
-const LIM = { valora:[0,600], probar:[0,400] };
+const LIM = { valora:600, probar:400 };
 
 // 15 afirmaciones en 5 competencias (el orden importa: se guarda por posición)
 const COMPETENCIAS = [
-  { nombre:'Compañerismo', icono:'🤝', preguntas:[
+  { nombre:'Compañerismo', icono:'🤝', color:'#f0ebff', preguntas:[
     'Cuando alguien del equipo se atasca, se implica para ayudarle aunque no sea su tarea.',
     'Si hace falta, hace un esfuerzo extra (quedarse un rato más, cubrir a alguien) para sacar adelante el trabajo del equipo.',
     'Comparte lo que sabe y ayuda a que los demás aprendan.' ]},
-  { nombre:'Orientación al cliente', icono:'🎯', preguntas:[
+  { nombre:'Orientación al cliente', icono:'🎯', color:'#fff0ea', preguntas:[
     'Se esfuerza por entender lo que el cliente necesita de verdad.',
     'Hace todo lo posible por dejar al cliente satisfecho, también cuando la cosa se complica.',
     'Transmite una imagen profesional del equipo ante el cliente.' ]},
-  { nombre:'Compromiso y responsabilidad', icono:'📌', preguntas:[
+  { nombre:'Compromiso', icono:'📌', color:'#e3f8f1', preguntas:[
     'Cumple lo que se compromete a hacer, en plazo y en las horas previstas.',
     'Avisa a tiempo cuando algo se va a retrasar o complicar.',
     'Asume sus errores y se implica en solucionarlos.' ]},
-  { nombre:'Comunicación y actitud', icono:'💬', preguntas:[
+  { nombre:'Comunicación y actitud', icono:'💬', color:'#e8f4ff', preguntas:[
     'Se explica con claridad y es fácil entenderse con él o ella.',
     'Mantiene una actitud positiva en momentos de presión.',
     'Se adapta bien a los cambios de prioridades o de requisitos.' ]},
-  { nombre:'Calidad del trabajo', icono:'🛠️', preguntas:[
+  { nombre:'Calidad del trabajo', icono:'🛠️', color:'#fff6d6', preguntas:[
     'Entrega un trabajo cuidado, que no hay que rehacer.',
     'Busca soluciones por su cuenta antes de quedarse bloqueado.',
     'Tiene inquietud por aprender y mejorar profesionalmente.' ]}
 ];
 const PREGUNTAS = COMPETENCIAS.flatMap((c, ci) => c.preguntas.map(t => ({ t, ci })));
-const ESCALA = ['Nada de acuerdo','Poco de acuerdo','Neutral','Bastante de acuerdo','Totalmente de acuerdo'];
+const ESCALA = ['Nada de acuerdo','Poco de acuerdo','Neutral','Bastante de acuerdo','¡Totalmente!'];
 
 const ERRORES = {
   SESION_INVALIDA:'Tu sesión ha caducado. Vuelve a entrar.',
-  LOGIN_INCORRECTO:'Nombre o contraseña incorrectos.',
+  LOGIN_INCORRECTO:'Uy, nombre o contraseña incorrectos.',
   PASS_CORTA:'La contraseña debe tener al menos 4 caracteres.',
   INVITACION_USADA:'Este enlace ya se usó. Entra con tu nombre y contraseña.',
-  RONDA_CERRADA:'La ronda de feedback ya está cerrada.',
+  RONDA_CERRADA:'La ronda de feedback está cerrada.',
   YA_ENVIADO:'Ya le has dejado feedback a esta persona.',
-  A_TI_MISMO:'No puedes dejarte feedback a ti mismo.',
+  A_TI_MISMO:'¡No puedes dejarte feedback a ti mismo! 😄',
   NO_ADMIN:'No tienes permisos de administración.',
-  VACIO:'Responde al menos una pregunta o escribe algo.',
+  VACIO:'Valora al menos una cosa o escribe algo.',
   TEXTO_LARGO:'Uno de los textos es demasiado largo.',
   DATOS_INVALIDOS:'Hay algún dato no válido. Recarga la página e inténtalo de nuevo.'
 };
@@ -147,31 +208,53 @@ let TOKEN = store.get();
 let YO = null;
 let TAB = 'dar';
 
+const PALETA = ['#7c5cff','#ff7a59','#16b88a','#3b82f6','#ec4899','#f59e0b','#0ea5e9','#8b5cf6','#ef4444','#14b8a6'];
+const colorDe = s => { let h = 0; for(const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETA[h % PALETA.length]; };
+const iniciales = s => s.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const nombreCorto = s => s.split(/\s+/)[0];
+const avatar = n => `<div class="avatar" style="background:${colorDe(n)}">${esc(iniciales(n))}</div>`;
+const fmt = n => n.toFixed(1).replace('.', ',');
+const estrellas = m => { const r = Math.round(m); return '★'.repeat(r) + '☆'.repeat(5 - r); };
+
+function toast(msg){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+function confeti(){
+  const cols = ['#7c5cff','#ff7a59','#16b88a','#ffb703','#3b82f6','#ec4899'];
+  for(let i = 0; i < 70; i++){
+    const c = document.createElement('div'); c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = cols[i % cols.length];
+    c.style.animationDuration = (1.4 + Math.random() * 1.6) + 's';
+    c.style.animationDelay = (Math.random() * .3) + 's';
+    document.body.appendChild(c); setTimeout(() => c.remove(), 3500);
+  }
+}
+const cargando = () => '<div class="skeleton"></div><div class="skeleton" style="margin-top:12px;height:140px"></div>';
+
 async function rpc(fn, args = {}){
   const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
-    method:'POST',
-    headers:{ apikey:SB_KEY, 'Content-Type':'application/json' },
-    body:JSON.stringify(args)
+    method:'POST', headers:{ apikey:SB_KEY, 'Content-Type':'application/json' }, body:JSON.stringify(args)
   });
   const txt = await r.text();
   const data = txt ? JSON.parse(txt) : null;
   if(!r.ok){
     const code = (data && data.message) || 'ERROR';
     if(code === 'SESION_INVALIDA'){ store.set(null); TOKEN = null; }
-    throw new Error(ERRORES[code] || 'Ha ocurrido un error. Inténtalo de nuevo.');
+    throw new Error(ERRORES[code] || 'Algo ha fallado. Inténtalo de nuevo.');
   }
   return data;
 }
-
-function counter(el, [min,max]){
-  const c = el.parentElement.querySelector('.count');
+function counter(el, max){
+  const c = el.parentElement.querySelector(`.count[data-for="${el.id}"]`);
   const n = el.value.trim().length;
-  c.textContent = `${n}/${max}`;
-  c.classList.toggle('bad', n > max || (min && n > 0 && n < min));
+  c.textContent = `${n}/${max}`; c.classList.toggle('bad', n > max);
 }
 
 // ---------- arranque ----------
 async function init(){
+  document.querySelector('.bottombar')?.remove();
   const code = new URLSearchParams(location.search).get('i');
   if(code && !TOKEN) return pantallaInvitacion(code);
   if(!TOKEN) return pantallaLogin();
@@ -182,357 +265,354 @@ async function init(){
   }catch(e){ pantallaLogin(e.message); }
 }
 
-// ---------- invitación (primera vez) ----------
+// ---------- invitación ----------
 async function pantallaInvitacion(code){
-  const app = $('#app');
+  $('#app').innerHTML = cargando();
   let info = null;
   try{ info = await rpc('fb_info_invitacion', { p_code:code }); }catch{}
-  if(!info){
-    history.replaceState(null, '', location.pathname);
-    return pantallaLogin('Este enlace no es válido. Pide uno nuevo a tu responsable.');
-  }
-  if(info.reclamada){
-    history.replaceState(null, '', location.pathname);
-    return pantallaLogin('Ya creaste tu contraseña con este enlace. Entra con tu nombre.');
-  }
-  app.innerHTML = `
-    <header><h1>💬 Feedback del equipo</h1></header>
+  history.replaceState(null, '', location.pathname);
+  if(!info) return pantallaLogin('Este enlace no es válido. Pide uno nuevo a tu responsable.');
+  if(info.reclamada) return pantallaLogin('Ya creaste tu contraseña con este enlace. Entra con tu nombre 👇');
+  $('#app').innerHTML = `
+    <div class="hero"><h1>¡Hola, ${esc(nombreCorto(info.nombre))}! 👋</h1><p>Bienvenido/a al feedback del equipo</p></div>
     <div class="card">
-      <h2>Hola, ${esc(info.nombre)} 👋</h2>
-      <p>Elige una contraseña para entrar. A partir de ahora entrarás eligiendo tu nombre y esta contraseña.</p>
-      <label for="p1">Contraseña</label>
-      <input id="p1" type="password" autocomplete="new-password">
-      <label for="p2">Repítela</label>
-      <input id="p2" type="password" autocomplete="new-password">
+      <h2>Elige tu contraseña</h2>
+      <p class="muted">Solo la primera vez. Luego entrarás eligiendo tu nombre y esta contraseña.</p>
+      <label for="p1">Contraseña</label><input id="p1" type="password" autocomplete="new-password">
+      <label for="p2">Repítela</label><input id="p2" type="password" autocomplete="new-password">
       <div class="err" id="err"></div>
-      <button id="go">Crear y entrar</button>
+      <button class="btn block" id="go">Crear y entrar ✨</button>
     </div>`;
   $('#go').onclick = async () => {
     const p1 = $('#p1').value, p2 = $('#p2').value;
     if(p1 !== p2) return $('#err').textContent = 'Las contraseñas no coinciden.';
+    $('#go').disabled = true;
     try{
       TOKEN = await rpc('fb_reclamar', { p_code:code, p_pass:p1 });
-      store.set(TOKEN);
-      history.replaceState(null, '', location.pathname);
-      init();
-    }catch(e){ $('#err').textContent = e.message; }
+      store.set(TOKEN); init();
+    }catch(e){ $('#err').textContent = e.message; $('#go').disabled = false; }
   };
 }
 
 // ---------- login ----------
 async function pantallaLogin(msg = ''){
-  const app = $('#app');
+  $('#app').innerHTML = cargando();
   let nombres = [];
   try{ nombres = await rpc('fb_lista_nombres'); }catch{}
-  app.innerHTML = `
-    <header><h1>💬 Feedback del equipo</h1></header>
+  $('#app').innerHTML = `
+    <div class="hero"><h1>Feedback del equipo 💜</h1><p>Lo que tus compañeros ven en ti (y tú en ellos)</p></div>
     <div class="card">
       <h2>Entrar</h2>
-      <label for="nom">Tu nombre</label>
+      <label for="nom">¿Quién eres?</label>
       <select id="nom"><option value="">Elige tu nombre…</option>
         ${nombres.map(n => `<option value="${n.id}">${esc(n.nombre)}</option>`).join('')}
       </select>
       <label for="pw">Contraseña</label>
       <input id="pw" type="password" autocomplete="current-password">
       <div class="err" id="err">${esc(msg)}</div>
-      <button id="go">Entrar</button>
-      <p class="muted" style="margin-top:14px">¿No apareces en la lista? Usa primero el enlace personal que te ha enviado tu responsable.</p>
+      <button class="btn block" id="go">Entrar</button>
+      <p class="muted small center" style="margin-top:14px">¿No sales en la lista? Usa primero el enlace personal que te pasó tu responsable.</p>
     </div>`;
   const go = async () => {
     const id = $('#nom').value, pw = $('#pw').value;
     if(!id || !pw) return $('#err').textContent = 'Elige tu nombre y escribe tu contraseña.';
     $('#go').disabled = true;
-    try{
-      TOKEN = await rpc('fb_login', { p_persona:id, p_pass:pw });
-      store.set(TOKEN);
-      init();
-    }catch(e){ $('#err').textContent = e.message; $('#go').disabled = false; }
+    try{ TOKEN = await rpc('fb_login', { p_persona:id, p_pass:pw }); store.set(TOKEN); init(); }
+    catch(e){ $('#err').textContent = e.message; $('#go').disabled = false; }
   };
   $('#go').onclick = go;
   $('#pw').onkeydown = e => { if(e.key === 'Enter') go(); };
 }
-
 async function salir(){
   try{ await rpc('fb_logout', { p_token:TOKEN }); }catch{}
-  store.set(null); TOKEN = null; YO = null;
-  pantallaLogin();
+  store.set(null); TOKEN = null; YO = null; pantallaLogin();
 }
 
 // ---------- principal ----------
 function pantallaPrincipal(){
-  const app = $('#app');
-  app.innerHTML = `
-    <header>
-      <div><h1>💬 ${esc(YO.ronda)}</h1><div class="who">${esc(YO.nombre)}</div></div>
-      <button class="sec small" id="salir">Salir</button>
-    </header>
+  $('#app').innerHTML = `
+    <div class="hero">
+      <button class="out" id="salir">Salir</button>
+      <h1>¡Hola, ${esc(nombreCorto(YO.nombre))}! 👋</h1>
+      <p>${YO.estado === 'cerrada' ? 'La ronda está cerrada, pero puedes ver lo que te han dejado.' : 'Un par de minutos por compañero marcan la diferencia.'}</p>
+    </div>
     <nav class="tabs">
-      <button data-t="dar">Dar feedback</button>
-      <button data-t="mio">Mi feedback</button>
-      ${YO.es_admin ? '<button data-t="admin">Administración</button>' : ''}
-      <button data-t="como">Cómo funciona</button>
+      <button data-t="dar">✍️ Dar</button>
+      <button data-t="mio">💌 Recibido</button>
+      ${YO.es_admin ? '<button data-t="admin">⚙️ Admin</button>' : ''}
+      <button data-t="como">❓ Ayuda</button>
     </nav>
     <div id="view"></div>`;
   $('#salir').onclick = salir;
-  app.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { TAB = b.dataset.t; pintarTab(); });
+  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { TAB = b.dataset.t; pintarTab(); });
   pintarTab();
 }
-
 function pintarTab(){
+  document.querySelector('.bottombar')?.remove();
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === TAB));
   ({ dar:vistaDar, mio:vistaMio, admin:vistaAdmin, como:vistaComo }[TAB] || vistaDar)();
+  window.scrollTo({ top:0, behavior:'smooth' });
 }
-
-const estadoTexto = e => ({
-  abierta:'La ronda está abierta: puedes dejar feedback.',
-  cerrada:'La ronda está cerrada. Los feedbacks se publicarán en breve.',
-  publicada:'Los feedbacks ya están publicados. Mira la pestaña «Mi feedback».'
-}[e]);
+function manejarError(e){
+  if(!TOKEN) return pantallaLogin(e.message);
+  $('#view').innerHTML = `<div class="card center"><div class="big-emoji">😵</div><p class="err">${esc(e.message)}</p></div>`;
+}
 
 // ---------- dar feedback ----------
 async function vistaDar(){
   const v = $('#view');
-  v.innerHTML = '<p class="muted">Cargando…</p>';
+  v.innerHTML = cargando();
   let gente = [];
-  try{ gente = await rpc('fb_companeros', { p_token:TOKEN }); }
-  catch(e){ return manejarError(e); }
+  try{ gente = await rpc('fb_companeros', { p_token:TOKEN }); }catch(e){ return manejarError(e); }
   const hechos = gente.filter(g => g.enviado).length;
+  const cerrada = YO.estado === 'cerrada';
   v.innerHTML = `
-    <div class="note">${estadoTexto(YO.estado)}</div>
+    ${cerrada ? '<div class="banner warm">🔒 La ronda está cerrada: ya no se puede dejar feedback.</div>' : ''}
     <div class="card">
-      <h2>¿A quién quieres dejar feedback?</h2>
-      <p class="muted">Elige solo a personas con las que hayas trabajado; se tarda un par de minutos por persona. Es anónimo: nadie, tampoco tu responsable, sabrá qué has escrito tú. Llevas <b>${hechos}</b>.</p>
-      <div class="people">
+      <h2>¿A quién le dejas feedback hoy?</h2>
+      <p class="muted">Elige a gente con la que hayas trabajado. Es anónimo: nadie sabrá qué has escrito tú.</p>
+      <div class="progress"><span style="width:${gente.length ? hechos / gente.length * 100 : 0}%"></span></div>
+      <p class="small muted" style="font-weight:800">${hechos ? `Llevas ${hechos} ${hechos === 1 ? 'compañero' : 'compañeros'} 🎉` : 'Aún no has dejado ninguno'}</p>
+      <input class="search" id="buscar" placeholder="🔎 Buscar compañero…">
+      <div class="people" id="gente">
         ${gente.map(g => `
-          <button class="person ${g.enviado ? 'done' : ''}" data-id="${g.id}" data-n="${esc(g.nombre)}" ${g.enviado || YO.estado !== 'abierta' ? 'disabled' : ''}>
-            <span>${esc(g.nombre)}</span>${g.enviado ? '<span class="tick">✓ enviado</span>' : ''}
+          <button class="person ${g.enviado ? 'done' : ''}" data-id="${g.id}" data-n="${esc(g.nombre)}" ${g.enviado || cerrada ? 'disabled' : ''}>
+            ${avatar(g.nombre)}
+            <span class="who">${esc(g.nombre)}<small>${g.enviado ? '✓ Hecho' : 'Pendiente'}</small></span>
           </button>`).join('')}
       </div>
     </div>`;
+  $('#buscar').oninput = e => {
+    const q = e.target.value.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    v.querySelectorAll('.person').forEach(p => {
+      const n = p.dataset.n.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+      p.classList.toggle('hide', !n.includes(q));
+    });
+  };
   v.querySelectorAll('.person:not(.done)').forEach(b => b.onclick = () => formulario(b.dataset.id, b.dataset.n));
 }
 
 function formulario(id, nombre){
   const v = $('#view');
   const notas = new Array(15).fill(null);
+  const corto = nombreCorto(nombre);
   v.innerHTML = `
     <div class="card">
       <button class="link" id="volver">← Volver</button>
-      <h2>Feedback para ${esc(nombre)}</h2>
-      <p class="muted">Todo es opcional: contesta solo lo que hayas visto de verdad y deja el resto en «No sé». Basta con una respuesta para poder enviarlo.</p>
-      ${COMPETENCIAS.map((c, ci) => `
-        <div class="comp">
-          <h3>${c.icono} ${esc(c.nombre)}</h3>
-          ${c.preguntas.map((t, k) => {
-            const i = ci * 3 + k;
-            return `<div class="q" data-i="${i}">
-              <p>${esc(t)}</p>
-              <div class="scale">
-                ${[1,2,3,4,5].map(n => `<button type="button" data-n="${n}" title="${ESCALA[n-1]}">${n}</button>`).join('')}
-                <button type="button" class="ns on" data-n="">No sé</button>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>`).join('')}
-      <div class="legend">1 = nada de acuerdo · 3 = neutral · 5 = totalmente de acuerdo</div>
-
+      <div class="row" style="margin-top:8px">${avatar(nombre)}<div><h2 style="margin:0">Feedback para ${esc(corto)}</h2><div class="small muted">${esc(nombre)}</div></div></div>
+      <p class="muted" style="margin-top:12px">Todo es opcional 🙌 Valora solo lo que hayas visto de verdad; lo que no, déjalo en «No sé».</p>
+    </div>
+    ${COMPETENCIAS.map((c, ci) => `
       <div class="comp">
-        <h3>✍️ Si quieres, escríbele algo</h3>
-        <label>Lo que más valoro de trabajar contigo</label>
-        <textarea id="va" maxlength="${LIM.valora[1]}" placeholder="Ej.: Cuando el cliente cambió el alcance, reorganizaste las tareas al momento y nadie se perdió."></textarea>
-        <div class="count"></div>
-        <label>Te propondría probar…</label>
-        <div class="hint">Una sugerencia para crecer, escrita como propuesta y no como queja.</div>
-        <textarea id="pr" maxlength="${LIM.probar[1]}" placeholder="Ej.: Compartir los avances antes de la entrega; así te podríamos echar una mano antes."></textarea>
-        <div class="count"></div>
-      </div>
-
-      <div class="sticky">
-        <div class="err" id="err"></div>
-        <button id="rev">Revisar y enviar</button>
-      </div>
+        <div class="comp-h"><div class="ico" style="background:${c.color}">${c.icono}</div><h3>${esc(c.nombre)}</h3></div>
+        ${c.preguntas.map((t, k) => {
+          const i = ci * 3 + k;
+          return `<div class="q" data-i="${i}">
+            <p>${esc(t)}</p>
+            <div class="stars">
+              ${[1,2,3,4,5].map(n => `<button type="button" class="star" data-n="${n}" aria-label="${n} de 5">★</button>`).join('')}
+              <button type="button" class="chipbtn grey ns">No sé</button>
+            </div>
+            <div class="qlabel"></div>
+          </div>`;
+        }).join('')}
+      </div>`).join('')}
+    <div class="comp">
+      <div class="comp-h"><div class="ico" style="background:#fff6d6">✍️</div><h3>Si te apetece, escríbele algo</h3></div>
+      <label for="va">💛 Lo que más valoro de trabajar contigo</label>
+      <textarea id="va" maxlength="${LIM.valora}" placeholder="Ej.: Cuando el cliente cambió el alcance, reorganizaste todo al momento y nadie se perdió."></textarea>
+      <div class="count" data-for="va"></div>
+      <label for="pr">🌱 Te propondría probar…</label>
+      <div class="hint">Una idea para crecer, en plan propuesta, no queja.</div>
+      <textarea id="pr" maxlength="${LIM.probar}" placeholder="Ej.: Compartir los avances antes de la entrega; así te echamos una mano antes."></textarea>
+      <div class="count" data-for="pr"></div>
+      <div style="height:8px"></div>
     </div>`;
-  $('#volver').onclick = vistaDar;
+  const bar = document.createElement('div');
+  bar.className = 'bottombar';
+  bar.innerHTML = `<div class="in"><span class="txt" id="prog">0 de 15 valoradas</span><button class="btn" id="rev">Revisar y enviar</button></div>`;
+  document.body.appendChild(bar);
+
+  const actualizar = () => {
+    const n = notas.filter(x => x !== null).length;
+    $('#prog').textContent = `${n} de 15 valoradas`;
+  };
+  $('#volver').onclick = () => { bar.remove(); vistaDar(); };
   v.querySelectorAll('.q').forEach(q => {
     const i = +q.dataset.i;
-    q.querySelectorAll('.scale button').forEach(b => b.onclick = () => {
-      const n = b.dataset.n ? +b.dataset.n : null;
-      notas[i] = (notas[i] === n) ? null : n;   // volver a pulsar la misma nota la quita
-      q.querySelectorAll('.scale button').forEach(x =>
-        x.classList.toggle('on', (x.dataset.n ? +x.dataset.n : null) === notas[i]));
-    });
+    const pinta = () => {
+      q.querySelectorAll('.star').forEach(s => s.classList.toggle('on', notas[i] !== null && +s.dataset.n <= notas[i]));
+      q.querySelector('.ns').classList.toggle('on', notas[i] === null);
+      q.querySelector('.ns').classList.toggle('grey', notas[i] !== null);
+      q.querySelector('.qlabel').textContent = notas[i] ? ESCALA[notas[i] - 1] : '';
+      actualizar();
+    };
+    q.querySelectorAll('.star').forEach(s => s.onclick = () => { const n = +s.dataset.n; notas[i] = notas[i] === n ? null : n; pinta(); });
+    q.querySelector('.ns').onclick = () => { notas[i] = null; pinta(); };
+    pinta();
   });
-  [['#va',LIM.valora],['#pr',LIM.probar]].forEach(([s,l]) => { const el = $(s); el.oninput = () => counter(el,l); counter(el,l); });
+  ['va','pr'].forEach(k => { const el = $('#' + k); el.oninput = () => counter(el, LIM[k === 'va' ? 'valora' : 'probar']); counter(el, LIM[k === 'va' ? 'valora' : 'probar']); });
 
   $('#rev').onclick = () => {
     const val = { notas:[...notas], va:$('#va').value.trim(), pr:$('#pr').value.trim() };
-    if(!val.notas.some(n => n !== null) && !val.va && !val.pr)
-      return $('#err').textContent = 'Responde al menos una pregunta o escribe algo.';
-    $('#err').textContent = '';
-    confirmar(id, nombre, val);
+    if(!val.notas.some(n => n !== null) && !val.va && !val.pr) return toast('Valora al menos una cosa o escribe algo 🙂');
+    confirmar(id, nombre, val, bar);
   };
 }
 
-function confirmar(id, nombre, val){
-  const m = document.createElement('div');
+function confirmar(id, nombre, val, bar){
   const contestadas = val.notas.filter(n => n !== null).length;
+  const m = document.createElement('div');
   m.className = 'modal';
   m.innerHTML = `
     <div class="card">
-      <h2>¿Lo enviamos?</h2>
-      <p class="muted">Una vez enviado <b>no se puede editar</b>, porque no se guarda quién lo escribió.</p>
-      <p>Has valorado <b>${contestadas}</b> de 15 afirmaciones.</p>
-      ${val.va ? `<div class="fb"><span class="tag keep">Lo que más valoro</span><blockquote>${esc(val.va)}</blockquote></div>` : ''}
-      ${val.pr ? `<div class="fb"><span class="tag try">Te propondría probar</span><blockquote>${esc(val.pr)}</blockquote></div>` : ''}
+      <div class="center"><div class="big-emoji">📨</div><h2>¿Se lo enviamos a ${esc(nombreCorto(nombre))}?</h2>
+      <p class="muted">Lo verá al momento, sin saber que eres tú. Una vez enviado no se puede editar.</p></div>
+      <p style="font-weight:800">⭐ Has valorado ${contestadas} de 15 afirmaciones</p>
+      ${val.va ? `<div class="note v" style="margin-bottom:10px"><div class="small muted" style="font-weight:800">💛 Lo que más valoro</div>${esc(val.va)}</div>` : ''}
+      ${val.pr ? `<div class="note p" style="margin-bottom:10px"><div class="small muted" style="font-weight:800">🌱 Te propondría probar</div>${esc(val.pr)}</div>` : ''}
       <div class="err" id="err2"></div>
-      <div class="row"><button id="ok">Enviar</button><button class="sec" id="no">Seguir editando</button></div>
+      <div class="row"><button class="btn" id="ok" style="flex:1">Enviar 🚀</button><button class="btn ghost" id="no">Seguir editando</button></div>
     </div>`;
   document.body.appendChild(m);
+  m.onclick = e => { if(e.target === m) m.remove(); };
   m.querySelector('#no').onclick = () => m.remove();
   m.querySelector('#ok').onclick = async () => {
     m.querySelector('#ok').disabled = true;
     try{
       await rpc('fb_responder', { p_token:TOKEN, p_dest:id, p_p:val.notas, p_valora:val.va || null, p_probar:val.pr || null });
-      m.remove();
+      m.remove(); bar.remove();
+      confeti(); toast(`¡Enviado! ${nombreCorto(nombre)} te lo agradecerá 💜`);
       vistaDar();
     }catch(e){ m.querySelector('#err2').textContent = e.message; m.querySelector('#ok').disabled = false; }
   };
 }
 
-// ---------- mi feedback ----------
+// ---------- recibido ----------
 async function vistaMio(){
   const v = $('#view');
-  v.innerHTML = '<p class="muted">Cargando…</p>';
+  v.innerHTML = cargando();
   let r;
-  try{ r = await rpc('fb_mis_feedbacks', { p_token:TOKEN }); }
-  catch(e){ return manejarError(e); }
+  try{ r = await rpc('fb_mis_feedbacks', { p_token:TOKEN }); }catch(e){ return manejarError(e); }
 
-  if(r.estado === 'abierta' || r.estado === 'cerrada'){
-    v.innerHTML = `<div class="card center">
-      <h2>Aún no está publicado</h2>
-      <p class="muted">Todos los feedbacks se publican a la vez cuando termina la ronda, para que nadie pueda deducir quién escribió qué.</p></div>`;
+  if(!r.total){
+    v.innerHTML = `<div class="card center"><div class="big-emoji">🌱</div><h2>Todavía no hay nada por aquí</h2>
+      <p class="muted">En cuanto un compañero te deje feedback, aparecerá aquí al momento. ¡Paciencia!</p></div>`;
     return;
   }
-  if(r.estado === 'insuficiente'){
-    v.innerHTML = `<div class="card center">
-      <h2>No hay suficientes respuestas</h2>
-      <p class="muted">Para proteger el anonimato solo mostramos el feedback cuando lo han dejado al menos ${r.min} personas, y en tu caso no se ha llegado. No dice nada de ti: simplemente no ha participado suficiente gente.</p></div>`;
-    return;
-  }
-
-  // Medias por afirmación (solo las que tienen respuestas suficientes) y por competencia
-  const media = {};
-  (r.preguntas || []).forEach(p => { if(p.media !== null) media[p.i - 1] = +p.media; });
+  const media = {}, votos = {};
+  (r.preguntas || []).forEach(p => { media[p.i - 1] = +p.media; votos[p.i - 1] = p.n; });
   const comps = COMPETENCIAS.map((c, ci) => {
     const vals = [0,1,2].map(k => media[ci*3 + k]).filter(x => x !== undefined);
-    return { ...c, ci, media: vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : null };
+    return { ...c, ci, media: vals.length ? vals.reduce((a,b) => a + b, 0) / vals.length : null };
   });
   const ranking = Object.entries(media).map(([i, m]) => ({ i:+i, m })).sort((a,b) => b.m - a.m);
   const fuertes = ranking.slice(0, 3);
-  const crecer = ranking.length >= 5 ? ranking.slice(-2).reverse() : [];
-  const fmt = n => n.toFixed(1).replace('.', ',');
-  const barra = m => `<div class="bar"><span style="width:${(m/5)*100}%"></span></div>`;
-
+  const crecer = ranking.length >= 6 ? ranking.slice(-2).reverse() : [];
+  const barra = m => `<div class="bar"><span style="width:${m / 5 * 100}%"></span></div>`;
   const textos = r.textos || [];
-  const valora = textos.filter(t => t.tipo === 'valora');
-  const probar = textos.filter(t => t.tipo === 'probar');
+  const valora = textos.filter(t => t.tipo === 'valora'), probar = textos.filter(t => t.tipo === 'probar');
 
   v.innerHTML = `
-    <div class="note">Han participado <b>${r.total}</b> compañeros. Nadie puede saber quién escribió qué. Léelo con calma: lo que aparece como «dónde crecer» son propuestas, no fallos.</div>
+    <div class="card total">
+      <div class="num">${r.total}</div>
+      <div><h3>${r.total === 1 ? 'persona te ha valorado' : 'personas te han valorado'} 🎉</h3>
+      <div class="small muted">Nadie sabe quién ni cuándo. Las medias se actualizan con cada respuesta nueva.</div></div>
+    </div>
 
     ${ranking.length ? `
     <div class="card">
-      <h2>Por competencias</h2>
-      <p class="muted">Media de 1 a 5. Solo se muestran las afirmaciones que han contestado al menos ${r.min} personas.</p>
+      <h2>Tus competencias</h2>
+      <p class="small muted">Media de 1 a 5 ⭐ · Toca una para ver el detalle</p>
       ${comps.map(c => `
         <details>
           <summary class="stat"><span class="lbl">${c.icono} ${esc(c.nombre)}</span>
-            ${c.media !== null ? `${barra(c.media)}<span class="val">${fmt(c.media)}</span>` : '<span class="muted">sin datos suficientes</span>'}
+            ${c.media !== null ? `${barra(c.media)}<span class="val">${fmt(c.media)}</span>` : '<span class="small muted">sin valorar</span>'}
           </summary>
-          ${c.preguntas.map((t, k) => { const m = media[c.ci*3 + k]; return `
-            <div class="stat" style="padding-left:24px;font-size:13px"><span class="lbl">${esc(t)}</span>
-              ${m !== undefined ? `${barra(m)}<span class="val">${fmt(m)}</span>` : '<span class="muted">—</span>'}
-            </div>`; }).join('')}
+          <div class="sub">
+            ${c.preguntas.map((t, k) => { const i = c.ci*3 + k; return `
+              <div class="stat"><span class="lbl">${esc(t)} ${votos[i] ? `<span class="votes">· ${votos[i]} ${votos[i] === 1 ? 'voto' : 'votos'}</span>` : ''}</span>
+                ${media[i] !== undefined ? `<span class="val" style="color:var(--gold)">${fmt(media[i])}</span>` : '<span class="small muted">—</span>'}
+              </div>`; }).join('')}
+          </div>
         </details>`).join('')}
-      <p class="muted" style="margin-top:8px">Toca una competencia para ver el detalle.</p>
     </div>
 
     <div class="card">
-      <h2>💪 Tus puntos fuertes</h2>
-      <div class="chips">${fuertes.map(f => `<div class="chip c-top">${esc(PREGUNTAS[f.i].t)} <b>${fmt(f.m)}</b></div>`).join('')}</div>
-      ${crecer.length ? `
-        <h2 style="margin-top:16px">🌱 Dónde podrías crecer</h2>
-        <div class="chips">${crecer.map(f => `<div class="chip c-low">${esc(PREGUNTAS[f.i].t)} <b>${fmt(f.m)}</b></div>`).join('')}</div>` : ''}
+      <h2>💪 Lo que mejor se te da</h2>
+      ${fuertes.map(f => `<div class="pill top"><span>${esc(PREGUNTAS[f.i].t)}</span><b>${fmt(f.m)}</b></div>`).join('')}
+      ${crecer.length ? `<h2 style="margin-top:18px">🌱 Por dónde podrías crecer</h2>
+        ${crecer.map(f => `<div class="pill low"><span>${esc(PREGUNTAS[f.i].t)}</span><b>${fmt(f.m)}</b></div>`).join('')}` : ''}
     </div>` : ''}
 
-    ${valora.length ? `<div class="card"><h2>Lo que más valoran de ti</h2><div id="lv"></div></div>` : ''}
-    ${probar.length ? `<div class="card"><h2>Te proponen probar…</h2><div id="lp"></div></div>` : ''}
-    ${!ranking.length && !textos.length ? '<div class="card"><p class="muted">No hay datos suficientes para mostrar.</p></div>' : ''}`;
+    ${valora.length ? `<div class="card"><h2>💛 Lo que más valoran de ti</h2><div class="notes" id="lv"></div></div>` : ''}
+    ${probar.length ? `<div class="card"><h2>🌱 Te proponen probar…</h2><p class="small muted">Ideas para crecer, no fallos.</p><div class="notes" id="lp"></div></div>` : ''}`;
 
-  const pinta = t => `
-    <div class="fb ${t.oculto ? 'hidden' : ''}" data-id="${t.id}">
-      <blockquote>${t.oculto ? '<i class="muted">Comentario oculto</i>' : esc(t.texto)}</blockquote>
+  const nota = (t, cls) => `
+    <div class="note ${cls} ${t.oculto ? 'hidden' : ''}" data-id="${t.id}">
+      <blockquote>${t.oculto ? '<i>Comentario oculto</i>' : esc(t.texto)}</blockquote>
       <div class="row">
-        <button class="small ${t.gracias ? '' : 'sec'}" data-a="gracias">${t.gracias ? '💚 Agradecido' : '💚 Dar las gracias'}</button>
-        <button class="small sec" data-a="ocultar">${t.oculto ? 'Mostrar' : 'Ocultar'}</button>
+        <button class="chipbtn ${t.gracias ? 'on' : ''}" data-a="gracias">${t.gracias ? '💚 ¡Gracias!' : '💚 Dar las gracias'}</button>
+        <button class="chipbtn grey" data-a="ocultar">${t.oculto ? 'Mostrar' : 'Ocultar'}</button>
       </div>
     </div>`;
-  if(valora.length) $('#lv').innerHTML = valora.map(pinta).join('');
-  if(probar.length) $('#lp').innerHTML = probar.map(pinta).join('');
-  v.querySelectorAll('.fb button').forEach(b => b.onclick = async () => {
-    const id = b.closest('.fb').dataset.id;
+  if(valora.length) $('#lv').innerHTML = valora.map(t => nota(t, 'v')).join('');
+  if(probar.length) $('#lp').innerHTML = probar.map(t => nota(t, 'p')).join('');
+  v.querySelectorAll('.note button').forEach(b => b.onclick = async () => {
+    const id = b.closest('.note').dataset.id;
     const t = textos.find(x => x.id === id);
     const args = { p_token:TOKEN, p_id:id, p_oculto:null, p_gracias:null };
     if(b.dataset.a === 'gracias') args.p_gracias = !t.gracias; else args.p_oculto = !t.oculto;
-    try{ await rpc('fb_marcar', args); vistaMio(); }catch(e){ manejarError(e); }
+    try{ await rpc('fb_marcar', args); if(args.p_gracias) toast('Gracias enviadas 💚'); vistaMio(); }catch(e){ manejarError(e); }
   });
 }
 
 // ---------- administración ----------
 async function vistaAdmin(){
   const v = $('#view');
-  v.innerHTML = '<p class="muted">Cargando…</p>';
+  v.innerHTML = cargando();
   let r;
-  try{ r = await rpc('fb_admin_resumen', { p_token:TOKEN }); }
-  catch(e){ return manejarError(e); }
+  try{ r = await rpc('fb_admin_resumen', { p_token:TOKEN }); }catch(e){ return manejarError(e); }
   const c = r.config, ps = r.personas;
   const base = location.origin + location.pathname;
   const activos = ps.filter(p => p.activo);
-  const bajoMin = activos.filter(p => p.recibidos < c.min_feedbacks).length;
+  const conCuenta = activos.filter(p => p.reclamada).length;
+  const totalDados = activos.reduce((a, p) => a + Number(p.dados), 0);
 
   v.innerHTML = `
-    <div class="note warm">Aquí solo ves cifras. El contenido de los feedbacks no es visible para nadie salvo para quien los recibe.</div>
+    <div class="banner">🔐 Solo tú ves esta pestaña. Aquí hay cifras, nunca el contenido de los feedbacks.</div>
     <div class="card">
       <h2>Ronda</h2>
+      <div class="row" style="gap:18px;margin:6px 0 4px">
+        <div><div style="font-size:26px;font-weight:900;color:var(--pri)">${conCuenta}/${activos.length}</div><div class="small muted">con cuenta</div></div>
+        <div><div style="font-size:26px;font-weight:900;color:var(--coral)">${totalDados}</div><div class="small muted">feedbacks dados</div></div>
+      </div>
       <label for="rn">Nombre</label><input id="rn" value="${esc(c.ronda)}">
       <label for="es">Estado</label>
       <select id="es">
-        <option value="abierta" ${c.estado==='abierta'?'selected':''}>Abierta: se puede escribir</option>
-        <option value="cerrada" ${c.estado==='cerrada'?'selected':''}>Cerrada: no se escribe ni se publica</option>
-        <option value="publicada" ${c.estado==='publicada'?'selected':''}>Publicada: cada uno ve lo suyo</option>
+        <option value="abierta" ${c.estado !== 'cerrada' ? 'selected' : ''}>🟢 Abierta: se puede dejar feedback</option>
+        <option value="cerrada" ${c.estado === 'cerrada' ? 'selected' : ''}>🔒 Cerrada: ya no se escribe (se sigue viendo lo recibido)</option>
       </select>
-      <label for="mn">Mínimo de feedbacks para mostrarlos</label>
-      <input id="mn" type="number" min="1" max="10" value="${c.min_feedbacks}">
       <div class="err" id="errc"></div>
-      <button id="gc">Guardar</button>
+      <button class="btn" id="gc">Guardar</button>
     </div>
 
     <div class="card">
       <h2>Personas (${activos.length})</h2>
-      <p class="muted">${bajoMin} persona(s) por debajo del mínimo de ${c.min_feedbacks}. Copia el enlace de cada uno y envíaselo por privado; solo sirve para crear su contraseña.</p>
+      <p class="small muted">«Copiar enlace» solo aparece mientras la persona no ha creado su contraseña.</p>
       <div class="tablewrap"><table>
-        <thead><tr><th>Nombre</th><th class="center">Cuenta</th><th class="center">Ha dado</th><th class="center">Recibidos</th><th></th></tr></thead>
+        <thead><tr><th>Nombre</th><th class="center">Cuenta</th><th class="center">Dados</th><th class="center">Recib.</th><th></th></tr></thead>
         <tbody>
         ${ps.map(p => `
           <tr style="${p.activo ? '' : 'opacity:.45'}" data-id="${p.id}" data-code="${p.invite_code}">
-            <td>${esc(p.nombre)}${p.es_admin ? ' <span class="muted">(admin)</span>' : ''}</td>
-            <td class="num">${p.reclamada ? '<span class="ok">✓</span>' : '—'}</td>
+            <td><div class="row" style="flex-wrap:nowrap">${avatar(p.nombre)}<span style="font-weight:700">${esc(p.nombre)}${p.es_admin ? ' <span class="small muted">(tú)</span>' : ''}</span></div></td>
+            <td class="num">${p.reclamada ? '✅' : '—'}</td>
             <td class="num">${p.dados}</td>
-            <td class="num ${p.recibidos < c.min_feedbacks ? 'low' : 'ok'}">${p.recibidos}</td>
+            <td class="num">${p.recibidos}</td>
             <td style="white-space:nowrap">
-              ${!p.reclamada && p.activo ? '<button class="small" data-a="copiar">Copiar enlace</button>' : ''}
-              ${p.reclamada ? '<button class="small sec" data-a="reset" title="Si ha olvidado la contraseña">Reiniciar</button>' : ''}
-              ${p.es_admin ? '' : `<button class="small sec" data-a="${p.activo ? 'desactivar' : 'activar'}">${p.activo ? 'Quitar' : 'Reactivar'}</button>`}
+              ${!p.reclamada && p.activo ? '<button class="chipbtn" data-a="copiar">Copiar enlace</button>' : ''}
+              ${p.reclamada && !p.es_admin ? '<button class="chipbtn grey" data-a="reset">Reiniciar</button>' : ''}
+              ${p.es_admin ? '' : `<button class="chipbtn grey" data-a="${p.activo ? 'desactivar' : 'activar'}">${p.activo ? 'Quitar' : 'Reactivar'}</button>`}
             </td>
           </tr>`).join('')}
         </tbody>
@@ -541,41 +621,37 @@ async function vistaAdmin(){
 
     <div class="card">
       <h2>Añadir personas</h2>
-      <p class="muted">Un nombre por línea, tal y como queráis que aparezca.</p>
+      <p class="small muted">Un nombre por línea.</p>
       <textarea id="nuevos" placeholder="Nombre Apellido&#10;Nombre Apellido"></textarea>
       <div class="err" id="erra"></div>
-      <button id="add">Añadir</button>
+      <button class="btn" id="add">Añadir</button>
     </div>`;
 
   $('#gc').onclick = async () => {
-    const estado = $('#es').value;
-    if(estado === 'publicada' && c.estado !== 'publicada' &&
-       !confirm('Al publicar, cada persona con al menos ' + $('#mn').value + ' feedbacks podrá verlos. ¿Publicar ahora?')) return;
     try{
-      await rpc('fb_admin_config', { p_token:TOKEN, p_ronda:$('#rn').value, p_estado:estado, p_min:+$('#mn').value });
+      await rpc('fb_admin_config', { p_token:TOKEN, p_ronda:$('#rn').value, p_estado:$('#es').value, p_min:null });
       YO = await rpc('fb_yo', { p_token:TOKEN });
-      pantallaPrincipal();
+      toast('Guardado ✅'); TAB = 'admin'; pantallaPrincipal();
     }catch(e){ $('#errc').textContent = e.message; }
   };
   $('#add').onclick = async () => {
     try{
       const n = await rpc('fb_admin_add', { p_token:TOKEN, p_nombres:$('#nuevos').value });
-      $('#erra').textContent = '';
-      if(!n) $('#erra').textContent = 'No se añadió nadie (¿nombres repetidos o vacíos?).';
-      else vistaAdmin();
+      if(!n) return $('#erra').textContent = 'No se añadió nadie (¿nombres repetidos o vacíos?).';
+      toast(`${n} ${n === 1 ? 'persona añadida' : 'personas añadidas'} 👍`); vistaAdmin();
     }catch(e){ $('#erra').textContent = e.message; }
   };
   v.querySelectorAll('tbody button').forEach(b => b.onclick = async () => {
     const tr = b.closest('tr'), a = b.dataset.a;
     if(a === 'copiar'){
       const link = `${base}?i=${tr.dataset.code}`;
-      try{ await navigator.clipboard.writeText(link); b.textContent = '¡Copiado!'; }
+      try{ await navigator.clipboard.writeText(link); toast('Enlace copiado 📋'); }
       catch{ prompt('Copia este enlace:', link); }
       return;
     }
-    if(a === 'reset' && !confirm('Se borrará su contraseña y se generará un enlace nuevo. ¿Continuar?')) return;
+    if(a === 'reset' && !confirm('Se borrará su contraseña y se generará un enlace nuevo. ¿Seguimos?')) return;
     try{ await rpc('fb_admin_persona', { p_token:TOKEN, p_id:tr.dataset.id, p_accion:a }); vistaAdmin(); }
-    catch(e){ alert(e.message); }
+    catch(e){ toast(e.message); }
   });
 }
 
@@ -583,22 +659,23 @@ async function vistaAdmin(){
 function vistaComo(){
   $('#view').innerHTML = `
     <div class="card">
-      <h2>Cómo funciona</h2>
-      <h3>Para qué sirve</h3>
-      <p>Para que cada uno sepa qué ven en él los compañeros con los que trabaja: lo que más valoran y algo que le ayudaría a crecer. Es para tu desarrollo; nadie más que tú lee tu feedback.</p>
-      <h3>Qué se escribe</h3>
-      <p>Por cada compañero, 15 afirmaciones agrupadas en 5 competencias (compañerismo, cliente, compromiso, comunicación y calidad) que se puntúan del 1 al 5. Además, dos campos de texto: <b>lo que más valoras</b> y <b>algo que le propondrías probar</b>. Todo es opcional; contesta solo lo que hayas visto.</p>
-      <h3>Anonimato</h3>
-      <p>No se guarda quién escribió cada respuesta ni cuándo. Solo se apunta que ya le has escrito a esa persona, para que no se repita. Por eso no se puede editar después de enviarlo. Los dos textos se guardan por separado, así que tampoco se puede saber qué «valora» y qué «probar» escribió la misma persona.</p>
-      <p>Todo se publica de golpe al cerrar la ronda y solo si una persona tiene al menos ${YO.min} feedbacks. Las notas se ven como media y solo en las afirmaciones que han contestado al menos ${YO.min} personas, nunca sueltas.</p>
-      <h3>Si algo no te gusta</h3>
-      <p>Puedes ocultar cualquier comentario que recibas y dar las gracias, de forma anónima, a los que te hayan servido.</p>
+      <h2>¿Para qué sirve esto? 🤔</h2>
+      <p>Para que cada uno sepa qué ven en él los compañeros con los que trabaja: lo que más valoran y algo que le ayudaría a crecer. En el día a día no siempre hay tiempo para decírselo.</p>
+    </div>
+    <div class="card">
+      <h2>¿Qué se rellena? ✍️</h2>
+      <p>15 afirmaciones en 5 bloques (compañerismo, cliente, compromiso, comunicación y calidad) que se valoran de 1 a 5 ⭐, y dos textos: <b>lo que más valoras</b> y <b>algo que le propondrías probar</b>.</p>
+      <p><b>Todo es opcional.</b> Valora solo lo que hayas visto; con una sola respuesta ya se puede enviar.</p>
+    </div>
+    <div class="card">
+      <h2>¿Es anónimo? 🕶️</h2>
+      <p>Sí. No se guarda quién escribió cada cosa ni cuándo; solo que ya le has escrito a esa persona, para que no se repita. Por eso no se puede editar después.</p>
+      <p>Quien lo recibe lo ve al momento: las medias, cuántas personas le han valorado y los comentarios en orden aleatorio. Los dos textos se guardan por separado, así que tampoco se sabe qué escribió la misma persona.</p>
+    </div>
+    <div class="card">
+      <h2>¿Y si algo no me gusta? 🙈</h2>
+      <p>Puedes ocultar cualquier comentario que recibas. Y dar las gracias de forma anónima a los que te hayan servido 💚</p>
     </div>`;
-}
-
-function manejarError(e){
-  if(!TOKEN) return pantallaLogin(e.message);
-  $('#view').innerHTML = `<div class="card"><p class="err">${esc(e.message)}</p></div>`;
 }
 
 init();

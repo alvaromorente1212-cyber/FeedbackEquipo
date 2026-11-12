@@ -8,10 +8,10 @@ App web de feedback anónimo entre compañeros. Por cada persona hay 15 afirmaci
 
 ## Anonimato
 - `fb_puntuaciones` (array de 15 notas) y `fb_textos` (cada texto en su propia fila) no guardan ni el autor ni la fecha.
-- Las notas solo se muestran como media por afirmación y únicamente si la han contestado al menos `min_feedbacks` personas.
+- Quien recibe el feedback lo ve al momento y sin mínimo de respuestas: la media de cada afirmación, cuántas personas le han valorado y los textos en orden aleatorio.
 - `fb_comentarios` y `fb_enviar` son de la versión anterior y ya no se usan.
 - `fb_enviados` solo registra que «X ya escribió a Y», para evitar duplicados, sin enlazarlo con el texto.
-- Los comentarios se publican todos a la vez (estado `publicada`) y solo a quien tenga al menos `min_feedbacks` (por defecto 3).
+- Estado de la ronda: `abierta` (se puede escribir) o `cerrada` (ya no se escribe, pero se sigue viendo lo recibido).
 - El administrador solo ve cifras, nunca el contenido.
 
 ## Acceso
