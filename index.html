@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#7c5cff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Feedback">
+<meta name="format-detection" content="telephone=no">
 <title>Feedback del equipo</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,6 +38,7 @@
   .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}
   .hero h1{font-size:24px}
   .hero p{margin:4px 0 0;opacity:.92;font-weight:600}
+  .hero h1{padding-right:64px}
   .hero .out{position:absolute;right:14px;top:14px;z-index:1;background:rgba(255,255,255,.18);color:#fff;border:0;padding:7px 12px;border-radius:99px;font-weight:800;font-size:13px}
 
   /* Pestañas */
@@ -73,6 +78,35 @@
   .avatar{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-weight:900;color:#fff;font-size:15px;flex-shrink:0}
   .search{margin:6px 0 12px}
   .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+  .searchbox{position:sticky;top:8px;z-index:4;margin:6px 0 12px}
+  .searchbox input{padding-left:42px;padding-right:42px;border-radius:16px;background:#fff;box-shadow:0 6px 16px -10px rgba(76,52,160,.35)}
+  .searchbox .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none}
+  .searchbox .clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:#f3f1f6;color:var(--muted);width:28px;height:28px;border-radius:50%;font-weight:900}
+  input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration{-webkit-appearance:none;display:none}
+  input[type=search]{-webkit-appearance:none;appearance:none}
+  .filters{display:flex;gap:6px;margin:-4px 0 12px;flex-wrap:wrap}
+  .person mark{background:#ffe9a8;color:inherit;border-radius:4px;padding:0 1px}
+  .empty{text-align:center;color:var(--muted);font-weight:700;padding:18px 0}
+  .picked{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:18px;background:var(--pri-soft);font-weight:800}
+  .picked .who{flex:1}
+  .results{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:300px;overflow:auto}
+  @media (max-width:520px){
+    .wrap{padding:12px 12px 120px}
+    .hero{padding:18px 16px;border-radius:24px}
+    .hero h1{font-size:21px}
+    .hero p{font-size:14px}
+    .card{padding:16px;border-radius:20px}
+    .comp{padding:14px 14px 4px}
+    .people{grid-template-columns:1fr;gap:8px}
+    .person{padding:9px 10px}
+    .tabs button{font-size:13px;padding:9px 8px}
+    .star{font-size:34px;padding:3px}
+    .stars{gap:0}
+    .bar{width:64px}
+    .notes{grid-template-columns:1fr}
+    .modal .card{max-height:92vh}
+    th:nth-child(3),td:nth-child(3){display:none}
+  }
   .person{display:flex;align-items:center;gap:12px;padding:10px 12px;border:2px solid var(--line);border-radius:18px;background:#fff;text-align:left;color:var(--ink);font-weight:800;transition:.15s}
   .person:not(:disabled):hover{border-color:var(--pri-2);transform:translateY(-1px)}
   .person .who{flex:1;line-height:1.2}
@@ -231,6 +265,50 @@ function confeti(){
     document.body.appendChild(c); setTimeout(() => c.remove(), 3500);
   }
 }
+// Búsqueda tolerante: sin mayúsculas, tildes, comas ni signos; cada palabra escrita busca
+// el comienzo de cualquier nombre o apellido, y admite una letra mal en palabras largas.
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/ñ/g, 'n').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+function casiIgual(a, b){            // distancia de edición <= 1
+  if(Math.abs(a.length - b.length) > 1) return false;
+  let i = 0, j = 0, dif = 0;
+  while(i < a.length && j < b.length){
+    if(a[i] === b[j]){ i++; j++; continue; }
+    if(++dif > 1) return false;
+    if(a.length > b.length) i++; else if(b.length > a.length) j++; else { i++; j++; }
+  }
+  return dif + (a.length - i) + (b.length - j) <= 1;
+}
+function puntuar(nombre, q){
+  const tokens = norm(q).split(' ').filter(Boolean);
+  if(!tokens.length) return 1;
+  const palabras = norm(nombre).split(' ');
+  let total = 0;
+  for(const t of tokens){
+    let mejor = 0;
+    for(const w of palabras){
+      if(w === t) mejor = Math.max(mejor, 4);
+      else if(w.startsWith(t)) mejor = Math.max(mejor, 3);
+      else if(t.length >= 3 && w.includes(t)) mejor = Math.max(mejor, 2);
+      else if(t.length >= 4 && (casiIgual(w.slice(0, t.length), t) || casiIgual(w, t))) mejor = Math.max(mejor, 1);
+    }
+    if(!mejor) return 0;
+    total += mejor;
+  }
+  return total;
+}
+function resaltar(nombre, q){
+  const tokens = norm(q).split(' ').filter(Boolean);
+  return nombre.split(' ').map(w => {
+    const nw = norm(w);
+    const t = tokens.filter(t => nw.startsWith(t)).sort((a, b) => b.length - a.length)[0];
+    return t ? `<mark>${esc(w.slice(0, t.length))}</mark>${esc(w.slice(t.length))}` : esc(w);
+  }).join(' ');
+}
+const cajaBusqueda = (id, ph) => `<div class="searchbox"><span class="ico">🔎</span>
+  <input id="${id}" type="search" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${ph}">
+  <button class="clear hide" type="button" aria-label="Borrar">✕</button></div>`;
+
 const cargando = () => '<div class="skeleton"></div><div class="skeleton" style="margin-top:12px;height:140px"></div>';
 
 async function rpc(fn, args = {}){
@@ -299,25 +377,51 @@ async function pantallaLogin(msg = ''){
   $('#app').innerHTML = cargando();
   let nombres = [];
   try{ nombres = await rpc('fb_lista_nombres'); }catch{}
+  let elegido = null;
   $('#app').innerHTML = `
     <div class="hero"><h1>Feedback del equipo 💜</h1><p>Lo que tus compañeros ven en ti (y tú en ellos)</p></div>
     <div class="card">
       <h2>Entrar</h2>
-      <label for="nom">¿Quién eres?</label>
-      <select id="nom"><option value="">Elige tu nombre…</option>
-        ${nombres.map(n => `<option value="${n.id}">${esc(n.nombre)}</option>`).join('')}
-      </select>
-      <label for="pw">Contraseña</label>
-      <input id="pw" type="password" autocomplete="current-password">
+      <label>¿Quién eres?</label>
+      <div id="quien">
+        ${cajaBusqueda('qn', 'Escribe tu nombre o apellido…')}
+        <div class="results" id="res"></div>
+      </div>
+      <div id="pwbox" class="hide">
+        <label for="pw">Contraseña</label>
+        <input id="pw" type="password" autocomplete="current-password" enterkeyhint="go">
+      </div>
       <div class="err" id="err">${esc(msg)}</div>
-      <button class="btn block" id="go">Entrar</button>
-      <p class="muted small center" style="margin-top:14px">¿No sales en la lista? Usa primero el enlace personal que te pasó tu responsable.</p>
+      <button class="btn block hide" id="go">Entrar</button>
+      <p class="muted small center" style="margin-top:14px">¿No te encuentras? Usa primero el enlace personal que te pasó tu responsable.</p>
     </div>`;
+  const pintarRes = () => {
+    const q = $('#qn').value;
+    $('#qn').parentElement.querySelector('.clear').classList.toggle('hide', !q);
+    const lista = nombres.map(n => ({ ...n, p:puntuar(n.nombre, q) })).filter(n => n.p).sort((a, b) => b.p - a.p || a.nombre.localeCompare(b.nombre));
+    $('#res').innerHTML = lista.length ? lista.map(n => `
+      <button class="person" data-id="${n.id}" data-n="${esc(n.nombre)}">${avatar(n.nombre)}<span class="who">${resaltar(n.nombre, q)}</span></button>`).join('')
+      : '<div class="empty">No encuentro a nadie con ese nombre 🤔</div>';
+    $('#res').querySelectorAll('.person').forEach(b => b.onclick = () => elegir(b.dataset.id, b.dataset.n));
+  };
+  const elegir = (id, nombre) => {
+    elegido = id;
+    $('#quien').innerHTML = `<div class="picked">${avatar(nombre)}<span class="who">${esc(nombre)}</span><button class="link" id="cambiar">Cambiar</button></div>`;
+    $('#cambiar').onclick = () => pantallaLogin();
+    $('#pwbox').classList.remove('hide');
+    $('#go').classList.remove('hide');
+    $('#err').textContent = '';
+    setTimeout(() => $('#pw').focus(), 50);
+  };
+  $('#qn').oninput = pintarRes;
+  pintarRes();
+  $('#qn').parentElement.querySelector('.clear').onclick = () => { $('#qn').value = ''; pintarRes(); $('#qn').focus(); };
   const go = async () => {
-    const id = $('#nom').value, pw = $('#pw').value;
-    if(!id || !pw) return $('#err').textContent = 'Elige tu nombre y escribe tu contraseña.';
+    const pw = $('#pw').value;
+    if(!elegido) return $('#err').textContent = 'Primero busca y elige tu nombre.';
+    if(!pw) return $('#err').textContent = 'Escribe tu contraseña.';
     $('#go').disabled = true;
-    try{ TOKEN = await rpc('fb_login', { p_persona:id, p_pass:pw }); store.set(TOKEN); init(); }
+    try{ TOKEN = await rpc('fb_login', { p_persona:elegido, p_pass:pw }); store.set(TOKEN); init(); }
     catch(e){ $('#err').textContent = e.message; $('#go').disabled = false; }
   };
   $('#go').onclick = go;
@@ -373,25 +477,37 @@ async function vistaDar(){
       <p class="muted">Elige a gente con la que hayas trabajado. Es anónimo: nadie sabrá qué has escrito tú.</p>
       <div class="progress"><span style="width:${gente.length ? hechos / gente.length * 100 : 0}%"></span></div>
       <p class="small muted" style="font-weight:800">${hechos ? `Llevas ${hechos} ${hechos === 1 ? 'compañero' : 'compañeros'} 🎉` : 'Aún no has dejado ninguno'}</p>
-      <input class="search" id="buscar" placeholder="🔎 Buscar compañero…">
-      <div class="people" id="gente">
-        ${gente.map(g => `
-          <button class="person ${g.enviado ? 'done' : ''}" data-id="${g.id}" data-n="${esc(g.nombre)}" ${g.enviado || cerrada ? 'disabled' : ''}>
-            ${avatar(g.nombre)}
-            <span class="who">${esc(g.nombre)}<small>${g.enviado ? '✓ Hecho' : 'Pendiente'}</small></span>
-          </button>`).join('')}
+      ${cajaBusqueda('buscar', 'Busca por nombre o apellido…')}
+      <div class="filters">
+        <button class="chipbtn on" data-f="pend">Pendientes</button>
+        <button class="chipbtn grey" data-f="todos">Todos</button>
       </div>
+      <div class="people" id="gente"></div>
     </div>`;
-  $('#buscar').oninput = e => {
-    const q = e.target.value.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
-    v.querySelectorAll('.person').forEach(p => {
-      const n = p.dataset.n.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
-      p.classList.toggle('hide', !n.includes(q));
-    });
+  let filtro = 'pend';
+  const pintar = () => {
+    const q = $('#buscar').value;
+    $('#buscar').parentElement.querySelector('.clear').classList.toggle('hide', !q);
+    let lista = gente.map(g => ({ ...g, p:puntuar(g.nombre, q) })).filter(g => g.p);
+    if(filtro === 'pend' && !q.trim()) lista = lista.filter(g => !g.enviado);
+    lista.sort((a, b) => b.p - a.p || a.enviado - b.enviado || a.nombre.localeCompare(b.nombre));
+    $('#gente').innerHTML = lista.length ? lista.map(g => `
+      <button class="person ${g.enviado ? 'done' : ''}" data-id="${g.id}" data-n="${esc(g.nombre)}" ${g.enviado || cerrada ? 'disabled' : ''}>
+        ${avatar(g.nombre)}
+        <span class="who">${resaltar(g.nombre, q)}<small>${g.enviado ? '✓ Hecho' : 'Pendiente'}</small></span>
+      </button>`).join('')
+      : `<div class="empty">${q.trim() ? 'No encuentro a nadie con ese nombre 🤔' : '¡Ya has dejado feedback a todos! 🏆'}</div>`;
+    $('#gente').querySelectorAll('.person:not(.done)').forEach(b => b.onclick = () => formulario(b.dataset.id, b.dataset.n));
   };
-  v.querySelectorAll('.person:not(.done)').forEach(b => b.onclick = () => formulario(b.dataset.id, b.dataset.n));
+  v.querySelectorAll('.filters button').forEach(b => b.onclick = () => {
+    filtro = b.dataset.f;
+    v.querySelectorAll('.filters button').forEach(x => { x.classList.toggle('on', x === b); x.classList.toggle('grey', x !== b); });
+    pintar();
+  });
+  $('#buscar').oninput = pintar;
+  $('#buscar').parentElement.querySelector('.clear').onclick = () => { $('#buscar').value = ''; pintar(); };
+  pintar();
 }
-
 function formulario(id, nombre){
   const v = $('#view');
   const notas = new Array(15).fill(null);
