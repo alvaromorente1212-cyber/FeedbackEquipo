@@ -63,6 +63,29 @@
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
   .modal .card{max-width:520px;width:100%;max-height:90vh;overflow:auto}
   .hide{display:none!important}
+  .comp{margin-top:18px}
+  .comp h3{font-size:15px;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .q{padding:10px 0;border-bottom:1px dashed var(--line)}
+  .q:last-child{border-bottom:0}
+  .q p{font-size:14px;margin:0 0 8px}
+  .scale{display:flex;gap:6px;flex-wrap:wrap}
+  .scale button{background:#fff;color:var(--ink);border:1px solid var(--line);padding:6px 0;width:40px;font-weight:600}
+  .scale button.ns{width:auto;padding:6px 10px;font-weight:500;color:var(--muted);font-size:13px}
+  .scale button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .scale button.ns.on{background:#eceae4;color:var(--ink);border-color:#d6d3ca}
+  .legend{font-size:12px;color:var(--muted);margin-top:6px}
+  .bar{height:8px;background:#eceae4;border-radius:99px;overflow:hidden;flex:1;min-width:60px}
+  .bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
+  .stat{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px}
+  .stat .lbl{flex:2}
+  .stat .val{width:34px;text-align:right;font-weight:700}
+  details summary{cursor:pointer;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  .chips{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+  .chip{font-size:14px;padding:8px 12px;border-radius:10px}
+  .chip.c-top{background:var(--accent-soft)}
+  .chip.c-low{background:var(--warm-soft)}
+  .sticky{position:sticky;bottom:0;background:var(--bg);padding:12px 0 4px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -71,7 +94,33 @@
 <script>
 const SB_URL = 'https://xefnuudfxyisaogadnmp.supabase.co';
 const SB_KEY = 'sb_publishable_aZZqdtt-x6gjEmF1kxW0ng_lDATB4I7';
-const LIM = { sigue:[10,600], probar:[10,300], kudos:[0,300] };
+const LIM = { valora:[0,600], probar:[0,400] };
+
+// 15 afirmaciones en 5 competencias (el orden importa: se guarda por posición)
+const COMPETENCIAS = [
+  { nombre:'Compañerismo', icono:'🤝', preguntas:[
+    'Cuando alguien del equipo se atasca, se implica para ayudarle aunque no sea su tarea.',
+    'Si hace falta, hace un esfuerzo extra (quedarse un rato más, cubrir a alguien) para sacar adelante el trabajo del equipo.',
+    'Comparte lo que sabe y ayuda a que los demás aprendan.' ]},
+  { nombre:'Orientación al cliente', icono:'🎯', preguntas:[
+    'Se esfuerza por entender lo que el cliente necesita de verdad.',
+    'Hace todo lo posible por dejar al cliente satisfecho, también cuando la cosa se complica.',
+    'Transmite una imagen profesional del equipo ante el cliente.' ]},
+  { nombre:'Compromiso y responsabilidad', icono:'📌', preguntas:[
+    'Cumple lo que se compromete a hacer, en plazo y en las horas previstas.',
+    'Avisa a tiempo cuando algo se va a retrasar o complicar.',
+    'Asume sus errores y se implica en solucionarlos.' ]},
+  { nombre:'Comunicación y actitud', icono:'💬', preguntas:[
+    'Se explica con claridad y es fácil entenderse con él o ella.',
+    'Mantiene una actitud positiva en momentos de presión.',
+    'Se adapta bien a los cambios de prioridades o de requisitos.' ]},
+  { nombre:'Calidad del trabajo', icono:'🛠️', preguntas:[
+    'Entrega un trabajo cuidado, que no hay que rehacer.',
+    'Busca soluciones por su cuenta antes de quedarse bloqueado.',
+    'Tiene inquietud por aprender y mejorar profesionalmente.' ]}
+];
+const PREGUNTAS = COMPETENCIAS.flatMap((c, ci) => c.preguntas.map(t => ({ t, ci })));
+const ESCALA = ['Nada de acuerdo','Poco de acuerdo','Neutral','Bastante de acuerdo','Totalmente de acuerdo'];
 
 const ERRORES = {
   SESION_INVALIDA:'Tu sesión ha caducado. Vuelve a entrar.',
@@ -81,7 +130,10 @@ const ERRORES = {
   RONDA_CERRADA:'La ronda de feedback ya está cerrada.',
   YA_ENVIADO:'Ya le has dejado feedback a esta persona.',
   A_TI_MISMO:'No puedes dejarte feedback a ti mismo.',
-  NO_ADMIN:'No tienes permisos de administración.'
+  NO_ADMIN:'No tienes permisos de administración.',
+  VACIO:'Responde al menos una pregunta o escribe algo.',
+  TEXTO_LARGO:'Uno de los textos es demasiado largo.',
+  DATOS_INVALIDOS:'Hay algún dato no válido. Recarga la página e inténtalo de nuevo.'
 };
 
 // ---------- utilidades ----------
@@ -249,7 +301,7 @@ async function vistaDar(){
     <div class="note">${estadoTexto(YO.estado)}</div>
     <div class="card">
       <h2>¿A quién quieres dejar feedback?</h2>
-      <p class="muted">Elige solo a personas con las que hayas trabajado. Es anónimo: nadie, tampoco tu responsable, sabrá qué has escrito tú. Llevas <b>${hechos}</b>.</p>
+      <p class="muted">Elige solo a personas con las que hayas trabajado; se tarda un par de minutos por persona. Es anónimo: nadie, tampoco tu responsable, sabrá qué has escrito tú. Llevas <b>${hechos}</b>.</p>
       <div class="people">
         ${gente.map(g => `
           <button class="person ${g.enviado ? 'done' : ''}" data-id="${g.id}" data-n="${esc(g.nombre)}" ${g.enviado || YO.estado !== 'abierta' ? 'disabled' : ''}>
@@ -262,42 +314,60 @@ async function vistaDar(){
 
 function formulario(id, nombre){
   const v = $('#view');
+  const notas = new Array(15).fill(null);
   v.innerHTML = `
     <div class="card">
       <button class="link" id="volver">← Volver</button>
       <h2>Feedback para ${esc(nombre)}</h2>
-      <p class="muted">Piensa en momentos concretos que hayas vivido con ${esc(nombre)}: qué hizo y qué efecto tuvo. Habla de lo que hace, no de cómo es.</p>
+      <p class="muted">Todo es opcional: contesta solo lo que hayas visto de verdad y deja el resto en «No sé». Basta con una respuesta para poder enviarlo.</p>
+      ${COMPETENCIAS.map((c, ci) => `
+        <div class="comp">
+          <h3>${c.icono} ${esc(c.nombre)}</h3>
+          ${c.preguntas.map((t, k) => {
+            const i = ci * 3 + k;
+            return `<div class="q" data-i="${i}">
+              <p>${esc(t)}</p>
+              <div class="scale">
+                ${[1,2,3,4,5].map(n => `<button type="button" data-n="${n}" title="${ESCALA[n-1]}">${n}</button>`).join('')}
+                <button type="button" class="ns on" data-n="">No sé</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`).join('')}
+      <div class="legend">1 = nada de acuerdo · 3 = neutral · 5 = totalmente de acuerdo</div>
 
-      <label>✅ Sigue haciendo… (1)</label>
-      <div class="hint">Algo que hace bien y que te gustaría que siguiera haciendo.</div>
-      <textarea id="s1" maxlength="${LIM.sigue[1]}" placeholder="Ej.: Cuando el cliente cambió el alcance en la reunión, reorganizaste las tareas al momento y nadie se perdió."></textarea>
-      <div class="count"></div>
+      <div class="comp">
+        <h3>✍️ Si quieres, escríbele algo</h3>
+        <label>Lo que más valoro de trabajar contigo</label>
+        <textarea id="va" maxlength="${LIM.valora[1]}" placeholder="Ej.: Cuando el cliente cambió el alcance, reorganizaste las tareas al momento y nadie se perdió."></textarea>
+        <div class="count"></div>
+        <label>Te propondría probar…</label>
+        <div class="hint">Una sugerencia para crecer, escrita como propuesta y no como queja.</div>
+        <textarea id="pr" maxlength="${LIM.probar[1]}" placeholder="Ej.: Compartir los avances antes de la entrega; así te podríamos echar una mano antes."></textarea>
+        <div class="count"></div>
+      </div>
 
-      <label>✅ Sigue haciendo… (2)</label>
-      <div class="hint">Otra cosa distinta que valoras de trabajar con ${esc(nombre)}.</div>
-      <textarea id="s2" maxlength="${LIM.sigue[1]}" placeholder="Ej.: Siempre sacas un rato para explicar las cosas cuando alguien se atasca."></textarea>
-      <div class="count"></div>
-
-      <label>🌱 Te propondría probar…</label>
-      <div class="hint">Una sola sugerencia que le ayudaría a crecer. Escríbela como propuesta, no como queja.</div>
-      <textarea id="pr" maxlength="${LIM.probar[1]}" placeholder="Ej.: Compartir los avances antes de la entrega; así te podríamos echar una mano antes."></textarea>
-      <div class="count"></div>
-
-      <label>🙌 Gracias por… <span class="muted">(opcional)</span></label>
-      <textarea id="ku" maxlength="${LIM.kudos[1]}" style="min-height:60px" placeholder="Ej.: Gracias por cubrirme el día que estuve malo."></textarea>
-      <div class="count"></div>
-
-      <div class="err" id="err"></div>
-      <div class="row"><button id="rev">Revisar y enviar</button></div>
+      <div class="sticky">
+        <div class="err" id="err"></div>
+        <button id="rev">Revisar y enviar</button>
+      </div>
     </div>`;
   $('#volver').onclick = vistaDar;
-  const campos = [['#s1',LIM.sigue],['#s2',LIM.sigue],['#pr',LIM.probar],['#ku',LIM.kudos]];
-  campos.forEach(([s,l]) => { const el = $(s); el.oninput = () => counter(el,l); counter(el,l); });
+  v.querySelectorAll('.q').forEach(q => {
+    const i = +q.dataset.i;
+    q.querySelectorAll('.scale button').forEach(b => b.onclick = () => {
+      const n = b.dataset.n ? +b.dataset.n : null;
+      notas[i] = (notas[i] === n) ? null : n;   // volver a pulsar la misma nota la quita
+      q.querySelectorAll('.scale button').forEach(x =>
+        x.classList.toggle('on', (x.dataset.n ? +x.dataset.n : null) === notas[i]));
+    });
+  });
+  [['#va',LIM.valora],['#pr',LIM.probar]].forEach(([s,l]) => { const el = $(s); el.oninput = () => counter(el,l); counter(el,l); });
 
   $('#rev').onclick = () => {
-    const val = { s1:$('#s1').value.trim(), s2:$('#s2').value.trim(), pr:$('#pr').value.trim(), ku:$('#ku').value.trim() };
-    if(val.s1.length < 10 || val.s2.length < 10) return $('#err').textContent = 'Escribe las dos cosas a seguir haciendo (mínimo 10 caracteres cada una).';
-    if(val.pr.length < 10) return $('#err').textContent = 'Escribe una sugerencia (mínimo 10 caracteres).';
+    const val = { notas:[...notas], va:$('#va').value.trim(), pr:$('#pr').value.trim() };
+    if(!val.notas.some(n => n !== null) && !val.va && !val.pr)
+      return $('#err').textContent = 'Responde al menos una pregunta o escribe algo.';
     $('#err').textContent = '';
     confirmar(id, nombre, val);
   };
@@ -305,17 +375,15 @@ function formulario(id, nombre){
 
 function confirmar(id, nombre, val){
   const m = document.createElement('div');
+  const contestadas = val.notas.filter(n => n !== null).length;
   m.className = 'modal';
   m.innerHTML = `
     <div class="card">
       <h2>¿Lo enviamos?</h2>
-      <p class="muted">Así lo leerá ${esc(nombre)}. Una vez enviado <b>no se puede editar</b>, porque no guardamos quién lo escribió.</p>
-      <div class="fb">
-        <span class="tag keep">Sigue haciendo</span><blockquote>${esc(val.s1)}</blockquote>
-        <span class="tag keep">Sigue haciendo</span><blockquote>${esc(val.s2)}</blockquote>
-        <span class="tag try">Te propondría probar</span><blockquote>${esc(val.pr)}</blockquote>
-        ${val.ku ? `<span class="tag kudos">Gracias por…</span><blockquote>${esc(val.ku)}</blockquote>` : ''}
-      </div>
+      <p class="muted">Una vez enviado <b>no se puede editar</b>, porque no se guarda quién lo escribió.</p>
+      <p>Has valorado <b>${contestadas}</b> de 15 afirmaciones.</p>
+      ${val.va ? `<div class="fb"><span class="tag keep">Lo que más valoro</span><blockquote>${esc(val.va)}</blockquote></div>` : ''}
+      ${val.pr ? `<div class="fb"><span class="tag try">Te propondría probar</span><blockquote>${esc(val.pr)}</blockquote></div>` : ''}
       <div class="err" id="err2"></div>
       <div class="row"><button id="ok">Enviar</button><button class="sec" id="no">Seguir editando</button></div>
     </div>`;
@@ -324,7 +392,7 @@ function confirmar(id, nombre, val){
   m.querySelector('#ok').onclick = async () => {
     m.querySelector('#ok').disabled = true;
     try{
-      await rpc('fb_enviar', { p_token:TOKEN, p_dest:id, p_sigue_1:val.s1, p_sigue_2:val.s2, p_probar:val.pr, p_kudos:val.ku || null });
+      await rpc('fb_responder', { p_token:TOKEN, p_dest:id, p_p:val.notas, p_valora:val.va || null, p_probar:val.pr || null });
       m.remove();
       vistaDar();
     }catch(e){ m.querySelector('#err2').textContent = e.message; m.querySelector('#ok').disabled = false; }
@@ -342,42 +410,80 @@ async function vistaMio(){
   if(r.estado === 'abierta' || r.estado === 'cerrada'){
     v.innerHTML = `<div class="card center">
       <h2>Aún no está publicado</h2>
-      <p class="muted">Todos los feedbacks se publican a la vez cuando termine la ronda, para que nadie pueda deducir quién escribió qué. Te avisaremos.</p></div>`;
+      <p class="muted">Todos los feedbacks se publican a la vez cuando termina la ronda, para que nadie pueda deducir quién escribió qué.</p></div>`;
     return;
   }
   if(r.estado === 'insuficiente'){
     v.innerHTML = `<div class="card center">
       <h2>No hay suficientes respuestas</h2>
-      <p class="muted">Para proteger el anonimato solo mostramos el feedback cuando hay al menos ${r.min} personas que lo han dejado, y en tu caso no se ha llegado. No dice nada de ti: simplemente no ha participado suficiente gente.</p></div>`;
+      <p class="muted">Para proteger el anonimato solo mostramos el feedback cuando lo han dejado al menos ${r.min} personas, y en tu caso no se ha llegado. No dice nada de ti: simplemente no ha participado suficiente gente.</p></div>`;
     return;
   }
-  const cs = r.comentarios;
-  const visibles = cs.filter(c => !c.oculto), ocultos = cs.filter(c => c.oculto);
+
+  // Medias por afirmación (solo las que tienen respuestas suficientes) y por competencia
+  const media = {};
+  (r.preguntas || []).forEach(p => { if(p.media !== null) media[p.i - 1] = +p.media; });
+  const comps = COMPETENCIAS.map((c, ci) => {
+    const vals = [0,1,2].map(k => media[ci*3 + k]).filter(x => x !== undefined);
+    return { ...c, ci, media: vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : null };
+  });
+  const ranking = Object.entries(media).map(([i, m]) => ({ i:+i, m })).sort((a,b) => b.m - a.m);
+  const fuertes = ranking.slice(0, 3);
+  const crecer = ranking.length >= 5 ? ranking.slice(-2).reverse() : [];
+  const fmt = n => n.toFixed(1).replace('.', ',');
+  const barra = m => `<div class="bar"><span style="width:${(m/5)*100}%"></span></div>`;
+
+  const textos = r.textos || [];
+  const valora = textos.filter(t => t.tipo === 'valora');
+  const probar = textos.filter(t => t.tipo === 'probar');
+
   v.innerHTML = `
-    <div class="note">Has recibido feedback de <b>${cs.length}</b> compañeros. El orden es aleatorio y no hay forma de saber quién escribió cada uno. Léelo con calma: lo de «probar» son propuestas para crecer, no fallos.</div>
-    <div id="lista"></div>
-    ${ocultos.length ? `<button class="link" id="verOcultos">Mostrar ${ocultos.length} oculto(s)</button><div id="ocultos" class="hide"></div>` : ''}`;
-  const pinta = c => `
-    <div class="fb ${c.oculto ? 'hidden' : ''}" data-id="${c.id}">
-      <span class="tag keep">Sigue haciendo</span><blockquote>${esc(c.sigue_1)}</blockquote>
-      <span class="tag keep">Sigue haciendo</span><blockquote>${esc(c.sigue_2)}</blockquote>
-      <span class="tag try">Te propondría probar</span><blockquote>${esc(c.probar)}</blockquote>
-      ${c.kudos ? `<span class="tag kudos">Gracias por…</span><blockquote>${esc(c.kudos)}</blockquote>` : ''}
+    <div class="note">Han participado <b>${r.total}</b> compañeros. Nadie puede saber quién escribió qué. Léelo con calma: lo que aparece como «dónde crecer» son propuestas, no fallos.</div>
+
+    ${ranking.length ? `
+    <div class="card">
+      <h2>Por competencias</h2>
+      <p class="muted">Media de 1 a 5. Solo se muestran las afirmaciones que han contestado al menos ${r.min} personas.</p>
+      ${comps.map(c => `
+        <details>
+          <summary class="stat"><span class="lbl">${c.icono} ${esc(c.nombre)}</span>
+            ${c.media !== null ? `${barra(c.media)}<span class="val">${fmt(c.media)}</span>` : '<span class="muted">sin datos suficientes</span>'}
+          </summary>
+          ${c.preguntas.map((t, k) => { const m = media[c.ci*3 + k]; return `
+            <div class="stat" style="padding-left:24px;font-size:13px"><span class="lbl">${esc(t)}</span>
+              ${m !== undefined ? `${barra(m)}<span class="val">${fmt(m)}</span>` : '<span class="muted">—</span>'}
+            </div>`; }).join('')}
+        </details>`).join('')}
+      <p class="muted" style="margin-top:8px">Toca una competencia para ver el detalle.</p>
+    </div>
+
+    <div class="card">
+      <h2>💪 Tus puntos fuertes</h2>
+      <div class="chips">${fuertes.map(f => `<div class="chip c-top">${esc(PREGUNTAS[f.i].t)} <b>${fmt(f.m)}</b></div>`).join('')}</div>
+      ${crecer.length ? `
+        <h2 style="margin-top:16px">🌱 Dónde podrías crecer</h2>
+        <div class="chips">${crecer.map(f => `<div class="chip c-low">${esc(PREGUNTAS[f.i].t)} <b>${fmt(f.m)}</b></div>`).join('')}</div>` : ''}
+    </div>` : ''}
+
+    ${valora.length ? `<div class="card"><h2>Lo que más valoran de ti</h2><div id="lv"></div></div>` : ''}
+    ${probar.length ? `<div class="card"><h2>Te proponen probar…</h2><div id="lp"></div></div>` : ''}
+    ${!ranking.length && !textos.length ? '<div class="card"><p class="muted">No hay datos suficientes para mostrar.</p></div>' : ''}`;
+
+  const pinta = t => `
+    <div class="fb ${t.oculto ? 'hidden' : ''}" data-id="${t.id}">
+      <blockquote>${t.oculto ? '<i class="muted">Comentario oculto</i>' : esc(t.texto)}</blockquote>
       <div class="row">
-        <button class="small ${c.gracias ? '' : 'sec'}" data-a="gracias">${c.gracias ? '💚 Agradecido' : '💚 Dar las gracias'}</button>
-        <button class="small sec" data-a="ocultar">${c.oculto ? 'Volver a mostrar' : 'Ocultar'}</button>
+        <button class="small ${t.gracias ? '' : 'sec'}" data-a="gracias">${t.gracias ? '💚 Agradecido' : '💚 Dar las gracias'}</button>
+        <button class="small sec" data-a="ocultar">${t.oculto ? 'Mostrar' : 'Ocultar'}</button>
       </div>
     </div>`;
-  $('#lista').innerHTML = visibles.map(pinta).join('');
-  if(ocultos.length){
-    $('#ocultos').innerHTML = ocultos.map(pinta).join('');
-    $('#verOcultos').onclick = () => { $('#ocultos').classList.toggle('hide'); };
-  }
+  if(valora.length) $('#lv').innerHTML = valora.map(pinta).join('');
+  if(probar.length) $('#lp').innerHTML = probar.map(pinta).join('');
   v.querySelectorAll('.fb button').forEach(b => b.onclick = async () => {
     const id = b.closest('.fb').dataset.id;
-    const c = cs.find(x => x.id === id);
+    const t = textos.find(x => x.id === id);
     const args = { p_token:TOKEN, p_id:id, p_oculto:null, p_gracias:null };
-    if(b.dataset.a === 'gracias') args.p_gracias = !c.gracias; else args.p_oculto = !c.oculto;
+    if(b.dataset.a === 'gracias') args.p_gracias = !t.gracias; else args.p_oculto = !t.oculto;
     try{ await rpc('fb_marcar', args); vistaMio(); }catch(e){ manejarError(e); }
   });
 }
@@ -481,12 +587,12 @@ function vistaComo(){
       <h3>Para qué sirve</h3>
       <p>Para que cada uno sepa qué ven en él los compañeros con los que trabaja: lo que más valoran y algo que le ayudaría a crecer. Es para tu desarrollo; nadie más que tú lee tu feedback.</p>
       <h3>Qué se escribe</h3>
-      <p>Por cada compañero: <b>dos cosas que hace bien y debería seguir haciendo</b> y <b>una propuesta para probar</b>. Además, un «gracias por…» opcional. Mejor si hablas de hechos concretos que de cómo es la persona.</p>
+      <p>Por cada compañero, 15 afirmaciones agrupadas en 5 competencias (compañerismo, cliente, compromiso, comunicación y calidad) que se puntúan del 1 al 5. Además, dos campos de texto: <b>lo que más valoras</b> y <b>algo que le propondrías probar</b>. Todo es opcional; contesta solo lo que hayas visto.</p>
       <h3>Anonimato</h3>
-      <p>No se guarda quién escribió cada comentario ni cuándo. Solo se apunta que ya le has escrito a esa persona, para que no se repita. Por eso no se puede editar después de enviarlo.</p>
-      <p>Todo se publica de golpe al cerrar la ronda y solo si una persona tiene al menos ${YO.min} feedbacks; si no, no se le enseña nada para que no se pueda adivinar el autor.</p>
+      <p>No se guarda quién escribió cada respuesta ni cuándo. Solo se apunta que ya le has escrito a esa persona, para que no se repita. Por eso no se puede editar después de enviarlo. Los dos textos se guardan por separado, así que tampoco se puede saber qué «valora» y qué «probar» escribió la misma persona.</p>
+      <p>Todo se publica de golpe al cerrar la ronda y solo si una persona tiene al menos ${YO.min} feedbacks. Las notas se ven como media y solo en las afirmaciones que han contestado al menos ${YO.min} personas, nunca sueltas.</p>
       <h3>Si algo no te gusta</h3>
-      <p>Puedes ocultar cualquier comentario que recibas. Y puedes dar las gracias de forma anónima a los que te hayan servido.</p>
+      <p>Puedes ocultar cualquier comentario que recibas y dar las gracias, de forma anónima, a los que te hayan servido.</p>
     </div>`;
 }
 
